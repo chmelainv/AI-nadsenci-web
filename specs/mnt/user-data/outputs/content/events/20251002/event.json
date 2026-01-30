@@ -1,0 +1,21 @@
+{
+  "id": "20251002",
+  "title": "Fajne prompty #1",
+  "date": "2. 10. 2025",
+  "time": "17:00 - 22:00",
+  "location": "Bar pod Ostravicí",
+  "attendees": 100,
+  "price": "349 Kč",
+  "status": "past",
+  "lumaLink": "https://luma.com/ouuw2s0x",
+  "description": "První historické setkání komunity Fajne prompty. 100+ účastníků, skvělá atmosféra a spousta nových kontaktů.",
+  "media": {
+    "cover": "media/cover.jpg",
+    "gallery": [
+      "media/gallery/01.jpg",
+      "media/gallery/02.jpg",
+      "media/gallery/03.jpg"
+    ],
+    "recap": "media/recap.mp4"
+  }
+}
