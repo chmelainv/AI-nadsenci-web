@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
     root: '.',
+    base: '/Fajne-prompty-web/',
     build: {
         outDir: 'out',
         rollupOptions: {

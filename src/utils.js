@@ -2,7 +2,7 @@
  * Load global texts
  */
 export async function loadTexts() {
-    const res = await fetch('/content/texts.json');
+    const res = await fetch('content/texts.json');
     return res.json();
 }
 
@@ -10,7 +10,7 @@ export async function loadTexts() {
  * Load organizers data
  */
 export async function loadOrganizers() {
-    const res = await fetch('/content/organizers.json');
+    const res = await fetch('content/organizers.json');
     return res.json();
 }
 
@@ -18,7 +18,7 @@ export async function loadOrganizers() {
  * Load partners data
  */
 export async function loadPartners() {
-    const res = await fetch('/content/partners.json');
+    const res = await fetch('content/partners.json');
     return res.json();
 }
 
@@ -27,17 +27,17 @@ export async function loadPartners() {
  */
 export async function loadEvents() {
     try {
-        const indexRes = await fetch('/content/events/index.json');
+        const indexRes = await fetch('content/events/index.json');
         if (!indexRes.ok) throw new Error('Failed to load events index');
 
         const { events: ids } = await indexRes.json();
 
         const events = await Promise.all(ids.map(async (id) => {
             try {
-                const res = await fetch(`/content/events/${id}/event.json`);
+                const res = await fetch(`content/events/${id}/event.json`);
                 if (!res.ok) return null;
                 const event = await res.json();
-                event.basePath = `/content/events/${id}/`;
+                event.basePath = `content/events/${id}/`;
                 return event;
             } catch (e) {
                 console.error(`Failed to load event ${id}`, e);

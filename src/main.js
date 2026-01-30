@@ -1,68 +1,68 @@
 import { loadTexts, loadEvents, loadOrganizers, loadPartners } from './utils.js';
 
 async function init() {
-    try {
-        const [texts, events, organizersData, partnersData] = await Promise.all([
-            loadTexts(),
-            loadEvents(),
-            loadOrganizers(),
-            loadPartners()
-        ]);
+  try {
+    const [texts, events, organizersData, partnersData] = await Promise.all([
+      loadTexts(),
+      loadEvents(),
+      loadOrganizers(),
+      loadPartners()
+    ]);
 
-        renderNavigation(texts.nav);
-        renderHero(texts.hero, events);
-        renderEvents(texts.events, events);
-        renderCommunity(texts.community, organizersData.organizers);
-        renderPartners(texts.partnership, partnersData.partners);
-        renderFooter(texts.footer);
+    renderNavigation(texts.nav);
+    renderHero(texts.hero, events);
+    renderEvents(texts.events, events);
+    renderCommunity(texts.community, organizersData.organizers);
+    renderPartners(texts.partnership, partnersData.partners);
+    renderFooter(texts.footer);
 
-        setupMobileMenu(texts.accessibility);
+    setupMobileMenu(texts.accessibility);
 
-    } catch (error) {
-        console.error('Failed to initialize app:', error);
-    }
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
+  }
 }
 
 function renderNavigation(nav) {
-    const desktopNav = document.querySelector('nav.hidden.md\\:flex');
-    const mobileNav = document.querySelector('#mobile-menu nav');
+  const desktopNav = document.querySelector('nav.hidden.md\\:flex');
+  const mobileNav = document.querySelector('#mobile-menu nav');
 
-    if (!nav || !nav.links) return;
+  if (!nav || !nav.links) return;
 
-    const createLinks = (isMobile) => nav.links.map(link => `
+  const createLinks = (isMobile) => nav.links.map(link => `
     <a href="${link.href}" class="${isMobile ? 'block py-2 text-lg text-gray-700 hover:text-blue-700' : 'text-gray-700 hover:text-blue-700 font-medium transition-colors'}">
       ${link.label}
     </a>
   `).join('');
 
-    if (desktopNav) desktopNav.innerHTML = createLinks(false);
-    if (mobileNav) mobileNav.innerHTML = createLinks(true);
+  if (desktopNav) desktopNav.innerHTML = createLinks(false);
+  if (mobileNav) mobileNav.innerHTML = createLinks(true);
 }
 
 function renderHero(hero, events) {
-    const container = document.querySelector('#hero .container');
-    if (!container || !hero) return;
+  const container = document.querySelector('#hero .container');
+  if (!container || !hero) return;
 
-    const statsHtml = hero.stats.map(stat => `
+  const statsHtml = hero.stats.map(stat => `
     <div class="flex flex-col items-center">
         <span class="text-3xl md:text-4xl font-bold text-${stat.color}-700">${stat.value}</span>
         <span class="text-gray-600 text-sm md:text-base mt-2">${stat.label}</span>
     </div>
   `).join('');
 
-    const ctaHtml = hero.cta.map(btn => {
-        const isFilled = btn.style === 'filled';
-        const isOutline = btn.style === 'outline';
-        const classes = isFilled
-            ? 'bg-blue-700 text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
-            : isOutline
-                ? 'border-2 border-blue-700 text-blue-700 hover:bg-blue-50'
-                : 'text-gray-600 hover:text-blue-700 underline decoration-2 underline-offset-4';
+  const ctaHtml = hero.cta.map(btn => {
+    const isFilled = btn.style === 'filled';
+    const isOutline = btn.style === 'outline';
+    const classes = isFilled
+      ? 'bg-blue-700 text-white hover:bg-blue-800 shadow-lg hover:shadow-xl'
+      : isOutline
+        ? 'border-2 border-blue-700 text-blue-700 hover:bg-blue-50'
+        : 'text-gray-600 hover:text-blue-700 underline decoration-2 underline-offset-4';
 
-        return `<a href="${btn.href}" ${btn.external ? 'target="_blank" rel="noopener"' : ''} class="px-6 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center ${classes}">${btn.label}</a>`;
-    }).join('');
+    return `<a href="${btn.href}" ${btn.external ? 'target="_blank" rel="noopener"' : ''} class="px-6 py-3 rounded-lg font-medium transition-all transform hover:-translate-y-0.5 inline-flex items-center justify-center ${classes}">${btn.label}</a>`;
+  }).join('');
 
-    container.innerHTML = `
+  container.innerHTML = `
     <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
       <span class="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent">
         ${hero.claim.line1}
@@ -85,58 +85,58 @@ function renderHero(hero, events) {
     <div class="mt-8">
       <p class="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">${hero.partnersLabel}</p>
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-         <img src="/images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
-         <img src="/images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
+         <img src="images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
+         <img src="images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
       </div>
     </div>
   `;
 }
 
 function renderEvents(texts, events) {
-    const container = document.querySelector('#akce .container');
-    const grid = document.querySelector('#events-grid');
-    if (!container || !grid || !texts) return;
+  const container = document.querySelector('#akce .container');
+  const grid = document.querySelector('#events-grid');
+  if (!container || !grid || !texts) return;
 
-    // Add Header
-    const header = document.createElement('div');
-    header.className = 'text-center max-w-3xl mx-auto mb-12';
-    header.innerHTML = `
+  // Add Header
+  const header = document.createElement('div');
+  header.className = 'text-center max-w-3xl mx-auto mb-12';
+  header.innerHTML = `
     <h2 class="text-3xl md:text-4xl font-bold mb-4">
       <span class="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">${texts.heading.split(' ')[0]}</span> 
       ${texts.heading.split(' ').slice(1).join(' ')}
     </h2>
     <p class="text-xl text-gray-600">${texts.subheading}</p>
   `;
-    container.insertBefore(header, grid);
+  container.insertBefore(header, grid);
 
-    // Render Cards
-    grid.innerHTML = events.map(event => {
-        const isPast = event.status === 'past';
-        const isSoldOut = event.status === 'sold-out';
+  // Render Cards
+  grid.innerHTML = events.map(event => {
+    const isPast = event.status === 'past';
+    const isSoldOut = event.status === 'sold-out';
 
-        const statusLabel = texts.statusLabels[event.status];
-        const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
+    const statusLabel = texts.statusLabels[event.status];
+    const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
 
-        // Media path
-        const coverImage = event.media && event.media.cover
-            ? `${event.basePath}${event.media.cover}`
-            : '/images/placeholder-event.svg';
+    // Media path
+    const coverImage = event.media && event.media.cover
+      ? `${event.basePath}${event.media.cover}`
+      : 'images/placeholder-event.svg';
 
-        let buttonsHtml = '';
-        if (isPast) {
-            buttonsHtml = `<a href="#" class="w-full block text-center px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">${texts.buttons.showRecap}</a>`;
-        } else if (isSoldOut) {
-            buttonsHtml = `<button disabled class="w-full block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>`;
-        } else {
-            buttonsHtml = `
+    let buttonsHtml = '';
+    if (isPast) {
+      buttonsHtml = `<a href="#" class="w-full block text-center px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">${texts.buttons.showRecap}</a>`;
+    } else if (isSoldOut) {
+      buttonsHtml = `<button disabled class="w-full block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>`;
+    } else {
+      buttonsHtml = `
          <div class="grid grid-cols-2 gap-3">
            <a href="${event.lumaLink}" target="_blank" class="block text-center px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">${texts.buttons.buyTicket}</a>
            <a href="#event-detail-${event.id}" class="block text-center px-4 py-2 border-2 border-blue-700 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors">${texts.buttons.learnMore}</a>
          </div>
        `;
-        }
+    }
 
-        return `
+    return `
       <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
         <div class="relative h-48 sm:h-64 bg-gray-100 overflow-hidden group">
           <img src="${coverImage}" alt="${event.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -176,28 +176,28 @@ function renderEvents(texts, events) {
         </div>
       </article>
     `;
-    }).join('');
+  }).join('');
 
-    // Add View All button
-    const footer = document.createElement('div');
-    footer.className = 'text-center mt-16';
-    footer.innerHTML = `
+  // Add View All button
+  const footer = document.createElement('div');
+  footer.className = 'text-center mt-16';
+  footer.innerHTML = `
     <button class="inline-flex items-center font-bold text-blue-700 hover:text-blue-900 transition-colors group">
       ${texts.viewAllButton}
       <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
     </button>
   `;
-    container.appendChild(footer);
+  container.appendChild(footer);
 }
 
 function renderCommunity(texts, organizers) {
-    const container = document.querySelector('#komunita .container');
-    const grid = document.querySelector('#organizers-grid');
-    if (!container || !grid || !texts) return;
+  const container = document.querySelector('#komunita .container');
+  const grid = document.querySelector('#organizers-grid');
+  if (!container || !grid || !texts) return;
 
-    const header = document.createElement('div');
-    header.className = 'max-w-3xl mx-auto mb-16';
-    header.innerHTML = `
+  const header = document.createElement('div');
+  header.className = 'max-w-3xl mx-auto mb-16';
+  header.innerHTML = `
     <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-900">
        <span class="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">${texts.heading.split(' ')[0]}</span>
        ${texts.heading.split(' ').slice(1).join(' ')}
@@ -207,9 +207,9 @@ function renderCommunity(texts, organizers) {
     </div>
     <h3 class="text-2xl font-bold mt-16 text-center">${texts.organizersHeading}</h3>
   `;
-    container.insertBefore(header, grid);
+  container.insertBefore(header, grid);
 
-    grid.innerHTML = organizers.map(org => `
+  grid.innerHTML = organizers.map(org => `
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
       <img src="${org.image}" alt="${org.name}" class="w-32 h-32 rounded-full object-cover mb-4 ring-4 ring-blue-50">
       <h4 class="text-xl font-bold mb-1">${org.name}</h4>
@@ -222,26 +222,26 @@ function renderCommunity(texts, organizers) {
 }
 
 function renderPartners(texts, partners) {
-    const container = document.querySelector('#partneri .container');
-    if (!container || !texts) return;
+  const container = document.querySelector('#partneri .container');
+  if (!container || !texts) return;
 
-    const benefitsHtml = texts.benefits.map(b => `
+  const benefitsHtml = texts.benefits.map(b => `
     <li class="flex items-center gap-3 text-gray-700">
       <svg class="w-5 h-5 text-green-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
       ${b}
     </li>
   `).join('');
 
-    const ctaHtml = texts.cta.map(btn => {
-        const isSecondary = btn.style === 'secondary';
-        const classes = isSecondary
-            ? 'text-gray-600 hover:text-blue-700 underline'
-            : 'border-2 border-blue-700 text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium';
+  const ctaHtml = texts.cta.map(btn => {
+    const isSecondary = btn.style === 'secondary';
+    const classes = isSecondary
+      ? 'text-gray-600 hover:text-blue-700 underline'
+      : 'border-2 border-blue-700 text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium';
 
-        return `<a href="${btn.href}" class="${classes} transition-colors inline-block text-center">${btn.label}</a>`;
-    }).join('');
+    return `<a href="${btn.href}" class="${classes} transition-colors inline-block text-center">${btn.label}</a>`;
+  }).join('');
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
       <div>
         <h2 class="text-3xl md:text-4xl font-bold mb-6">
@@ -273,14 +273,14 @@ function renderPartners(texts, partners) {
 }
 
 function renderFooter(texts) {
-    const container = document.querySelector('#footer .container');
-    if (!container || !texts) return;
+  const container = document.querySelector('#footer .container');
+  if (!container || !texts) return;
 
-    const linksHtml = (section) => section.links.map(link => `
+  const linksHtml = (section) => section.links.map(link => `
     <li><a href="${link.href}" class="text-gray-500 hover:text-blue-700 transition-colors">${link.label}</a></li>
   `).join('');
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
       <div>
         <a href="#" class="text-xl font-bold bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent block mb-4">
@@ -329,26 +329,26 @@ function renderFooter(texts) {
 }
 
 function setupMobileMenu(a11y) {
-    const btn = document.getElementById('mobile-menu-btn');
-    const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
 
-    if (btn && menu) {
-        btn.addEventListener('click', () => {
-            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-            btn.setAttribute('aria-expanded', !isExpanded);
-            menu.classList.toggle('hidden');
-            btn.setAttribute('aria-label', !isExpanded ? a11y.closeMenu : a11y.menuToggle);
-        });
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', !isExpanded);
+      menu.classList.toggle('hidden');
+      btn.setAttribute('aria-label', !isExpanded ? a11y.closeMenu : a11y.menuToggle);
+    });
 
-        // Close menu when clicking links
-        menu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                menu.classList.add('hidden');
-                btn.setAttribute('aria-expanded', 'false');
-                btn.setAttribute('aria-label', a11y.menuToggle);
-            });
-        });
-    }
+    // Close menu when clicking links
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-label', a11y.menuToggle);
+      });
+    });
+  }
 }
 
 init();
