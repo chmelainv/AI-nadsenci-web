@@ -63,13 +63,18 @@ function renderHero(hero, events) {
   }).join('');
 
   container.innerHTML = `
+    <!-- Hero photo left -->
+    <img src="images/events/hero-left.jpg" alt="" class="hidden lg:block absolute left-8 xl:left-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
+    <!-- Hero photo right -->
+    <img src="images/events/hero-right.jpg" alt="" class="hidden lg:block absolute right-8 xl:right-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
+
     <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
       <span class="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent">
         ${hero.claim.line1}
       </span><br/>
       <span class="text-gray-900">${hero.claim.line2}</span>
     </h1>
-    
+
     <div class="max-w-2xl mx-auto space-y-4 mb-10 text-lg md:text-xl text-gray-600 leading-relaxed">
       ${hero.intro.map(p => `<p>${p}</p>`).join('')}
     </div>
@@ -81,7 +86,7 @@ function renderHero(hero, events) {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 py-10 border-t border-gray-200">
        ${statsHtml}
     </div>
-    
+
     <div class="mt-8">
       <p class="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">${hero.partnersLabel}</p>
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
