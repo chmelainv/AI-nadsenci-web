@@ -9,9 +9,14 @@
     "status": "past",
     "lumaLink": "#",
     "description": "První setkání komunity Fajne prompty. Úvod do světa AI, networking a pivo.",
+    "longDescription": "První velké setkání komunity Fajne prompty se konalo v Cafe Club Dock v Ostravě. Sešlo se přes 100 nadšenců do umělé inteligence z celého Moravskoslezského kraje.\nProgram zahrnoval lightning talks od lokálních AI praktiků, panelovou diskuzi o budoucnosti AI v regionu a samozřejmě spoustu networkingu u dobrého piva.\nAkce ukázala, že v MSK je obrovský zájem o AI a že offline setkávání má stále svou nezastupitelnou hodnotu.",
+    "recapText": "První Fajne prompty předčily všechna očekávání. Místo plánovaných 60 lidí dorazilo přes 100 účastníků, kteří zaplnili celý Cafe Club Dock.\nAtmosféra byla od začátku skvělá — lidé se poznávali, sdíleli své zkušenosti s AI a společně diskutovali o tom, jak umělou inteligenci využívají ve svém oboru.\nLightning talks pokryly témata od generativního AI v marketingu přes automatizaci procesů až po etické otázky. Největší ohlas sklidila diskuze o tom, jak AI mění práci v regionu.\nDěkujeme všem, kteří přišli, a těšíme se na další setkání!",
     "media": {
         "cover": "media/cover1.png",
-        "gallery": [],
+        "gallery": [
+            "media/gallery/DOCK-3.JPG",
+            "media/gallery/DOCK-5.JPG"
+        ],
         "recap": "media/recap.mp4"
     }
 }

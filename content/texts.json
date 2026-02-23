@@ -128,6 +128,22 @@
     }
   },
 
+  "eventsPage": {
+    "subtitle": "Přehled všech našich akcí — nadcházejících i proběhlých",
+    "upcomingHeading": "Nadcházející akce",
+    "pastHeading": "Proběhlé akce"
+  },
+
+  "eventDetail": {
+    "aboutTitle": "O akci",
+    "galleryTitle": "Fotogalerie",
+    "recapTitle": "Jak to bylo",
+    "videoTitle": "Video recap",
+    "backToList": "Zpět na seznam akcí",
+    "notFoundTitle": "Akce nenalezena",
+    "notFoundText": "Tato akce neexistuje nebo byla odstraněna."
+  },
+
   "accessibility": {
     "skipLink": "Přejít na hlavní obsah",
     "menuToggle": "Otevřít navigační menu",

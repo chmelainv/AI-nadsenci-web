@@ -1,8 +1,10 @@
+const BASE = import.meta.env.BASE_URL;
+
 /**
  * Load global texts
  */
 export async function loadTexts() {
-    const res = await fetch('content/texts.json');
+    const res = await fetch(`${BASE}content/texts.json`);
     return res.json();
 }
 
@@ -10,7 +12,7 @@ export async function loadTexts() {
  * Load organizers data
  */
 export async function loadOrganizers() {
-    const res = await fetch('content/organizers.json');
+    const res = await fetch(`${BASE}content/organizers.json`);
     return res.json();
 }
 
@@ -18,7 +20,7 @@ export async function loadOrganizers() {
  * Load partners data
  */
 export async function loadPartners() {
-    const res = await fetch('content/partners.json');
+    const res = await fetch(`${BASE}content/partners.json`);
     return res.json();
 }
 
@@ -27,17 +29,17 @@ export async function loadPartners() {
  */
 export async function loadEvents() {
     try {
-        const indexRes = await fetch('content/events/index.json');
+        const indexRes = await fetch(`${BASE}content/events/index.json`);
         if (!indexRes.ok) throw new Error('Failed to load events index');
 
         const { events: ids } = await indexRes.json();
 
         const events = await Promise.all(ids.map(async (id) => {
             try {
-                const res = await fetch(`content/events/${id}/event.json`);
+                const res = await fetch(`${BASE}content/events/${id}/event.json`);
                 if (!res.ok) return null;
                 const event = await res.json();
-                event.basePath = `content/events/${id}/`;
+                event.basePath = `${BASE}content/events/${id}/`;
                 return event;
             } catch (e) {
                 console.error(`Failed to load event ${id}`, e);
@@ -47,15 +49,11 @@ export async function loadEvents() {
 
         const validEvents = events.filter(e => e !== null);
 
-        // Sort events by date (newest first)? Or closest future date?
-        // PRD doesn't specify sort, but usually upcoming first.
-        // For now returning as is, but we might want to sort.
         return validEvents.sort((a, b) => {
-            // Simple date parsing assuming "d. m. yyyy" format
             const parseDate = (d) => {
                 const parts = d.split('. ');
                 if (parts.length < 3) return new Date();
-                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
             };
             return parseDate(b.date) - parseDate(a.date);
         });
@@ -64,4 +62,29 @@ export async function loadEvents() {
         console.error("Error loading events:", e);
         return [];
     }
+}
+
+/**
+ * Load a single event by ID
+ */
+export async function loadEvent(id) {
+    try {
+        const res = await fetch(`${BASE}content/events/${id}/event.json`);
+        if (!res.ok) return null;
+        const event = await res.json();
+        event.basePath = `${BASE}content/events/${id}/`;
+        return event;
+    } catch (e) {
+        console.error(`Failed to load event ${id}`, e);
+        return null;
+    }
+}
+
+/**
+ * Parse Czech date format "d. m. yyyy" to Date object
+ */
+export function parseCzechDate(d) {
+    const parts = d.split('. ');
+    if (parts.length < 3) return new Date();
+    return new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
 }

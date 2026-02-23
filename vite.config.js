@@ -8,6 +8,8 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 main: 'index.html',
+                akce: 'akce/index.html',
+                'akce-detail': 'akce/detail.html',
             },
         },
     },

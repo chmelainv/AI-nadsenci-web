@@ -1,4 +1,7 @@
 import { loadTexts, loadEvents, loadOrganizers, loadPartners } from './utils.js';
+import { renderNavigation, renderFooter, setupMobileMenu } from './shared.js';
+
+const BASE = import.meta.env.BASE_URL;
 
 async function init() {
   try {
@@ -11,7 +14,11 @@ async function init() {
 
     renderNavigation(texts.nav);
     renderHero(texts.hero, events);
-    renderEvents(texts.events, events);
+    // Homepage: show only 2 nearest upcoming events (or most recent if no upcoming)
+    const upcoming = events.filter(e => e.status !== 'past');
+    const past = events.filter(e => e.status === 'past');
+    const homepageEvents = [...upcoming, ...past].slice(0, 2);
+    renderEvents(texts.events, homepageEvents);
     renderCommunity(texts.community, organizersData.organizers);
     renderPartners(texts.partnership, partnersData.partners);
     renderFooter(texts.footer);
@@ -21,22 +28,6 @@ async function init() {
   } catch (error) {
     console.error('Failed to initialize app:', error);
   }
-}
-
-function renderNavigation(nav) {
-  const desktopNav = document.querySelector('nav.hidden.md\\:flex');
-  const mobileNav = document.querySelector('#mobile-menu nav');
-
-  if (!nav || !nav.links) return;
-
-  const createLinks = (isMobile) => nav.links.map(link => `
-    <a href="${link.href}" class="${isMobile ? 'block py-2 text-lg text-gray-700 hover:text-blue-700' : 'text-gray-700 hover:text-blue-700 font-medium transition-colors'}">
-      ${link.label}
-    </a>
-  `).join('');
-
-  if (desktopNav) desktopNav.innerHTML = createLinks(false);
-  if (mobileNav) mobileNav.innerHTML = createLinks(true);
 }
 
 function renderHero(hero, events) {
@@ -64,9 +55,9 @@ function renderHero(hero, events) {
 
   container.innerHTML = `
     <!-- Hero photo left -->
-    <img src="images/events/hero-left.jpg" alt="" class="hidden lg:block absolute left-8 xl:left-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-left.jpg" alt="" class="hidden lg:block absolute left-8 xl:left-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
     <!-- Hero photo right -->
-    <img src="images/events/hero-right.jpg" alt="" class="hidden lg:block absolute right-8 xl:right-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-right.jpg" alt="" class="hidden lg:block absolute right-8 xl:right-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
 
     <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
       <span class="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent">
@@ -90,8 +81,8 @@ function renderHero(hero, events) {
     <div class="mt-8">
       <p class="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">${hero.partnersLabel}</p>
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-         <img src="images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
-         <img src="images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
+         <img src="${BASE}images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
+         <img src="${BASE}images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
       </div>
     </div>
   `;
@@ -107,7 +98,7 @@ function renderEvents(texts, events) {
   header.className = 'text-center max-w-3xl mx-auto mb-12';
   header.innerHTML = `
     <h2 class="text-3xl md:text-4xl font-bold mb-4">
-      <span class="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">${texts.heading.split(' ')[0]}</span> 
+      <span class="bg-gradient-to-r from-blue-700 to-purple-700 bg-clip-text text-transparent">${texts.heading.split(' ')[0]}</span>
       ${texts.heading.split(' ').slice(1).join(' ')}
     </h2>
     <p class="text-xl text-gray-600">${texts.subheading}</p>
@@ -115,84 +106,87 @@ function renderEvents(texts, events) {
   container.insertBefore(header, grid);
 
   // Render Cards
-  grid.innerHTML = events.map(event => {
-    const isPast = event.status === 'past';
-    const isSoldOut = event.status === 'sold-out';
-
-    const statusLabel = texts.statusLabels[event.status];
-    const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
-
-    // Media path
-    const coverImage = event.media && event.media.cover
-      ? `${event.basePath}${event.media.cover}`
-      : 'images/placeholder-event.svg';
-
-    let buttonsHtml = '';
-    if (isPast) {
-      buttonsHtml = `<a href="#" class="w-full block text-center px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">${texts.buttons.showRecap}</a>`;
-    } else if (isSoldOut) {
-      buttonsHtml = `<button disabled class="w-full block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>`;
-    } else {
-      buttonsHtml = `
-         <div class="grid grid-cols-2 gap-3">
-           <a href="${event.lumaLink}" target="_blank" class="block text-center px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">${texts.buttons.buyTicket}</a>
-           <a href="#event-detail-${event.id}" class="block text-center px-4 py-2 border-2 border-blue-700 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors">${texts.buttons.learnMore}</a>
-         </div>
-       `;
-    }
-
-    return `
-      <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
-        <div class="relative h-48 sm:h-64 bg-gray-100 overflow-hidden group">
-          <img src="${coverImage}" alt="${event.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-          <span class="absolute top-4 right-4 px-3 py-1 bg-${statusColor}-700 text-white text-sm font-bold rounded-full shadow-md">
-            ${statusLabel}
-          </span>
-        </div>
-        
-        <div class="p-6 md:p-8 flex flex-col flex-grow">
-          <h3 class="text-2xl font-bold mb-2 text-gray-900">${event.title}</h3>
-          
-          <div class="space-y-3 mb-6 flex-grow">
-             <div class="flex items-center text-gray-600">
-                <span class="w-24 font-medium text-gray-400">${texts.infoLabels.date}</span>
-                <span class="font-medium">${event.date}</span>
-             </div>
-             <div class="flex items-center text-gray-600">
-                <span class="w-24 font-medium text-gray-400">${texts.infoLabels.time}</span>
-                <span>${event.time}</span>
-             </div>
-             <div class="flex items-center text-gray-600">
-                <span class="w-24 font-medium text-gray-400">${texts.infoLabels.location}</span>
-                <span>${event.location}</span>
-             </div>
-             
-             ${!isPast ? `
-             <div class="flex items-center text-gray-600 mt-4 pt-4 border-t border-gray-100">
-                <span class="w-24 font-medium text-gray-400">${texts.infoLabels.price}</span>
-                <span class="font-bold text-gray-900">${event.price}</span>
-             </div>
-             ` : ''}
-          </div>
-
-          <div class="mt-auto">
-            ${buttonsHtml}
-          </div>
-        </div>
-      </article>
-    `;
-  }).join('');
+  grid.innerHTML = events.map(event => renderEventCard(event, texts)).join('');
 
   // Add View All button
   const footer = document.createElement('div');
   footer.className = 'text-center mt-16';
   footer.innerHTML = `
-    <button class="inline-flex items-center font-bold text-blue-700 hover:text-blue-900 transition-colors group">
+    <a href="${BASE}akce/" class="inline-flex items-center font-bold text-blue-700 hover:text-blue-900 transition-colors group">
       ${texts.viewAllButton}
       <svg class="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-    </button>
+    </a>
   `;
   container.appendChild(footer);
+}
+
+function renderEventCard(event, texts) {
+  const isPast = event.status === 'past';
+  const isSoldOut = event.status === 'sold-out';
+
+  const statusLabel = texts.statusLabels[event.status];
+  const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
+
+  const coverImage = event.media && event.media.cover
+    ? `${event.basePath}${event.media.cover}`
+    : `${BASE}images/placeholder-event.svg`;
+
+  const detailUrl = `${BASE}akce/detail.html?id=${event.id}`;
+
+  let buttonsHtml = '';
+  if (isPast) {
+    buttonsHtml = `<a href="${detailUrl}" class="w-full block text-center px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">${texts.buttons.showRecap}</a>`;
+  } else if (isSoldOut) {
+    buttonsHtml = `<button disabled class="w-full block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>`;
+  } else {
+    buttonsHtml = `
+       <div class="grid grid-cols-2 gap-3">
+         <a href="${event.lumaLink}" target="_blank" class="block text-center px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-colors">${texts.buttons.buyTicket}</a>
+         <a href="${detailUrl}" class="block text-center px-4 py-2 border-2 border-blue-700 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors">${texts.buttons.learnMore}</a>
+       </div>
+     `;
+  }
+
+  return `
+    <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
+      <div class="relative h-48 sm:h-64 bg-gray-100 overflow-hidden group">
+        <img src="${coverImage}" alt="${event.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        <span class="absolute top-4 right-4 px-3 py-1 bg-${statusColor}-700 text-white text-sm font-bold rounded-full shadow-md">
+          ${statusLabel}
+        </span>
+      </div>
+
+      <div class="p-6 md:p-8 flex flex-col flex-grow">
+        <h3 class="text-2xl font-bold mb-2 text-gray-900">${event.title}</h3>
+
+        <div class="space-y-3 mb-6 flex-grow">
+           <div class="flex items-center text-gray-600">
+              <span class="w-24 font-medium text-gray-400">${texts.infoLabels.date}</span>
+              <span class="font-medium">${event.date}</span>
+           </div>
+           <div class="flex items-center text-gray-600">
+              <span class="w-24 font-medium text-gray-400">${texts.infoLabels.time}</span>
+              <span>${event.time}</span>
+           </div>
+           <div class="flex items-center text-gray-600">
+              <span class="w-24 font-medium text-gray-400">${texts.infoLabels.location}</span>
+              <span>${event.location}</span>
+           </div>
+
+           ${!isPast ? `
+           <div class="flex items-center text-gray-600 mt-4 pt-4 border-t border-gray-100">
+              <span class="w-24 font-medium text-gray-400">${texts.infoLabels.price}</span>
+              <span class="font-bold text-gray-900">${event.price}</span>
+           </div>
+           ` : ''}
+        </div>
+
+        <div class="mt-auto">
+          ${buttonsHtml}
+        </div>
+      </div>
+    </article>
+  `;
 }
 
 function renderCommunity(texts, organizers) {
@@ -256,7 +250,7 @@ function renderPartners(texts, partners) {
         <div class="space-y-4 text-lg text-gray-600 mb-8">
            ${texts.paragraphs.map(p => `<p>${p}</p>`).join('')}
         </div>
-        
+
         <ul class="space-y-3 mb-10">
            ${benefitsHtml}
         </ul>
@@ -265,7 +259,7 @@ function renderPartners(texts, partners) {
            ${ctaHtml}
         </div>
       </div>
-      
+
       <div class="grid grid-cols-2 gap-8">
          ${partners.map(p => `
            <a href="${p.url}" target="_blank" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:shadow-md transition-shadow h-48 group">
@@ -275,85 +269,6 @@ function renderPartners(texts, partners) {
       </div>
     </div>
   `;
-}
-
-function renderFooter(texts) {
-  const container = document.querySelector('#footer .container');
-  if (!container || !texts) return;
-
-  const linksHtml = (section) => section.links.map(link => `
-    <li><a href="${link.href}" class="text-gray-500 hover:text-blue-700 transition-colors">${link.label}</a></li>
-  `).join('');
-
-  container.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-      <div>
-        <a href="#" class="text-xl font-bold bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent block mb-4">
-          FAJNE PROMPTY
-        </a>
-        <p class="text-gray-500 mb-6">${texts.description}</p>
-      </div>
-
-      <div>
-        <h4 class="font-bold mb-6 text-gray-900">${texts.sections.navigation.heading}</h4>
-        <ul class="space-y-3">
-          ${linksHtml(texts.sections.navigation)}
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-bold mb-6 text-gray-900">${texts.sections.contact.heading}</h4>
-        <ul class="space-y-3 text-gray-500">
-          <li><a href="mailto:${texts.sections.contact.email}" class="hover:text-blue-700 transition-colors">${texts.sections.contact.email}</a></li>
-          <li>${texts.sections.contact.phone}</li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-bold mb-6 text-gray-900">${texts.sections.social.heading}</h4>
-        <div class="flex gap-4">
-           ${texts.sections.social.links.map(l => `
-             <a href="${l.href}" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 hover:bg-blue-700 hover:text-white transition-all transform hover:scale-110">
-               <span class="sr-only">${l.label}</span>
-               <!-- Using a generic icon for now, would use specific icons based on l.icon -->
-               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.492 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z"/></svg> 
-             </a>
-           `).join('')}
-        </div>
-      </div>
-    </div>
-
-    <div class="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-      <p>${texts.copyright}</p>
-      <div class="flex items-center gap-2">
-        <span>${texts.organizer.label}</span>
-        <a href="${texts.organizer.href}" class="font-bold text-gray-900 hover:text-blue-700 transition-colors">${texts.organizer.name}</a>
-      </div>
-    </div>
-  `;
-}
-
-function setupMobileMenu(a11y) {
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
-
-  if (btn && menu) {
-    btn.addEventListener('click', () => {
-      const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-      btn.setAttribute('aria-expanded', !isExpanded);
-      menu.classList.toggle('hidden');
-      btn.setAttribute('aria-label', !isExpanded ? a11y.closeMenu : a11y.menuToggle);
-    });
-
-    // Close menu when clicking links
-    menu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        menu.classList.add('hidden');
-        btn.setAttribute('aria-expanded', 'false');
-        btn.setAttribute('aria-label', a11y.menuToggle);
-      });
-    });
-  }
 }
 
 init();
