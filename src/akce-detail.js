@@ -232,8 +232,8 @@ function renderEventDetail(event, texts) {
     </section>
 
     ${recapHtml}
-    ${galleryHtml}
     ${videoHtml}
+    ${galleryHtml}
 
     <!-- Back link -->
     <section class="py-12">

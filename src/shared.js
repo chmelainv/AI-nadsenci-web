@@ -49,7 +49,7 @@ export function renderFooter(texts, isSubpage = false) {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
       <div>
         <a href="${BASE}" class="text-xl font-bold bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent block mb-4">
-          FAJNE PROMPTY
+          AI nadšenci
         </a>
         <p class="text-gray-500 mb-6">${texts.description}</p>
       </div>

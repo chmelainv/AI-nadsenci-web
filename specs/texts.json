@@ -10,7 +10,6 @@
     "links": [
       { "label": "Akce", "href": "#akce" },
       { "label": "Komunita", "href": "#komunita" },
-      { "label": "AI Nadšenci", "href": "#nadsenci" },
       { "label": "Partneři", "href": "#partneri" },
       { "label": "Kontakt", "href": "#kontakt" }
     ]
@@ -101,7 +100,6 @@
         "links": [
           { "label": "Akce", "href": "#akce" },
           { "label": "Komunita", "href": "#komunita" },
-          { "label": "AI Nadšenci", "href": "#nadsenci" },
           { "label": "Partneři", "href": "#partneri" }
         ]
       },
