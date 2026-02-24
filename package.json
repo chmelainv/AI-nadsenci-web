@@ -10,16 +10,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/katerina-svi/Fajne-prompty-web.git"
+    "url": "git+https://github.com/chmelainv/AI-nadsenci-web.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/katerina-svi/Fajne-prompty-web/issues"
+    "url": "https://github.com/chmelainv/AI-nadsenci-web/issues"
   },
-  "homepage": "https://github.com/katerina-svi/Fajne-prompty-web#readme",
+  "homepage": "https://chmelainv.github.io/AI-nadsenci-web/",
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.1",

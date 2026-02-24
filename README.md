@@ -1,52 +1,80 @@
-# Fajne Prompty Web
+# AI nadšenci Web
 
-Komunitní web pro Fajne Prompty - setkání AI nadšenců v Moravskoslezském kraji.
+Komunitní web pro AI nadšence - neformální komunitu lidí v Moravskoslezském kraji, kteří se zajímají o AI a scházejí se offline.
 
-## 🚀 Technologie
-- **HTML5** (Sémantická struktura)
-- **Tailwind CSS** (Styling a design system)
-- **Vanilla JavaScript** (Logika a vykreslování)
-- **Vite** (Build tool)
-- **GitHub Pages** (Hosting)
+**Live:** [https://chmelainv.github.io/AI-nadsenci-web/](https://chmelainv.github.io/AI-nadsenci-web/)
 
-## 📂 Struktura Projektu
+## Technologie
+- **HTML5** - sémantická struktura
+- **Tailwind CSS** - styling a design system
+- **Vanilla JavaScript** - logika a vykreslování
+- **Vite** - build tool
+- **GitHub Pages** - hosting (auto-deploy z `main`)
+
+## Struktura projektu
 ```
-fajne-prompty/
-├── .github/workflows/  # CI/CD konfigurace
-├── content/           # JSON data (texty, eventy, partneři)
-├── public/            # Statické soubory (obrázky)
-├── src/               # Zdrojový kód (JS, CSS)
-├── index.html         # Hlavní šablona
-└── vite.config.js     # Konfigurace buildu
+AI-nadsenci-web/
+├── .github/workflows/    # CI/CD (GitHub Actions → Pages)
+├── akce/                 # Podstránky akcí
+│   ├── index.html        # Výpis všech akcí
+│   └── detail.html       # Detail akce (galerie, recap, video)
+├── content/              # JSON data
+│   ├── texts.json        # Globální texty, navigace, footer
+│   ├── organizers.json   # Organizátoři
+│   ├── partners.json     # Partneři
+│   └── events/           # Akce (každá ve vlastní složce)
+│       ├── index.json    # Seznam ID akcí
+│       └── {id}/         # Složka akce
+│           ├── event.json  # Data akce
+│           └── media/      # Cover, galerie, video
+├── public/               # Statické soubory (obrázky)
+├── src/
+│   ├── style.css         # Tailwind entry point
+│   ├── main.js           # Homepage logika
+│   ├── shared.js         # Sdílené komponenty (nav, footer, menu)
+│   ├── akce.js           # Výpis akcí
+│   └── akce-detail.js    # Detail akce + lightbox galerie
+├── index.html            # Homepage
+├── vite.config.js        # Build konfigurace (multi-page)
+└── tailwind.config.js    # Tailwind konfigurace
 ```
 
-## 🛠 Instalace a Spuštění
+## Instalace a spuštění
 
-1. **Instalace závislostí**
-   ```bash
-   npm install
-   ```
+```bash
+npm install       # Instalace závislostí
+npm run dev       # Lokální dev server
+npm run build     # Produkční build (do out/)
+npm run preview   # Náhled produkčního buildu
+```
 
-2. **Spuštění lokálního serveru**
-   ```bash
-   npm run dev
-   ```
+## Správa obsahu
 
-3. **Build pro produkci**
-   ```bash
-   npm run build
-   ```
+Veškerý obsah je v JSON souborech ve složce `content/`.
 
-## 📝 Správa Obsahu
-Veškerý textový obsah je v `content/*.json`.
-- `texts.json`: Globální texty, navigace, footer.
-- `events/`: Složky pro jednotlivé události.
-- `organizers.json`: Seznam organizátorů.
-- `partners.json`: Seznam partnerů.
+### Přidání nové akce
+1. Vytvoř složku `content/events/{YYYYMMDD}/`
+2. Přidej `event.json` s daty akce (viz existující akce jako vzor)
+3. Přidej cover obrázek do `media/`
+4. Přidej ID do `content/events/index.json`
 
-## 🎨 Design
-Využívá `Inter` font a vlastní barevnou paletu definovanou v `tailwind.config.js`.
+### Statusy akcí
+- `open` - nadcházející, prodej lístků otevřen
+- `sold-out` - vyprodáno (zobrazí disabled tlačítko + odkaz na detail)
+- `past` - proběhlá (zobrazí recap, galerii, video)
 
-## 🌐 Deployment
-Web se automaticky deployuje na GitHub Pages po pushnutí do `main` větve.
-URL: [https://katerina-svi.github.io/Fajne-prompty-web/](https://katerina-svi.github.io/Fajne-prompty-web/) (Příklad)
+### Galerie a recap (pro proběhlé akce)
+- Fotky přidej do `content/events/{id}/media/` a vyplň pole `gallery` v `event.json`
+- Recap video přidej do `media/` a vyplň `media.recap`
+- Text recapu vyplň v `recapText`
+
+### Stránky
+- **Homepage** (`/`) - zobrazuje max 2 nejbližší akce
+- **Výpis akcí** (`/akce/`) - všechny akce (nadcházející + proběhlé)
+- **Detail akce** (`/akce/detail.html?id={id}`) - plný detail s galerií a lightboxem
+
+## Design
+Font Inter, vlastní barevná paleta v `tailwind.config.js`.
+
+## Deployment
+Web se automaticky deployuje na GitHub Pages přes GitHub Actions po pushnutí do `main` větve.
