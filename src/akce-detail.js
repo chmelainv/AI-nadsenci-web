@@ -64,7 +64,7 @@ function renderEventDetail(event, texts) {
   const detailTexts = texts.eventDetail || {};
 
   const statusLabel = eventTexts.statusLabels[event.status];
-  const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
+  const statusBadgeClass = isPast ? 'bg-gray-700' : isSoldOut ? 'bg-red-700' : 'bg-green-700';
 
   const coverImage = event.media && event.media.cover
     ? `${event.basePath}${event.media.cover}`
@@ -183,7 +183,7 @@ function renderEventDetail(event, texts) {
 
           <!-- Event Info -->
           <div class="w-full lg:w-1/2">
-            <span class="inline-block px-3 py-1 bg-${statusColor}-700 text-white text-sm font-bold rounded-full mb-4">
+            <span class="inline-block px-3 py-1 ${statusBadgeClass} text-white text-sm font-bold rounded-full mb-4">
               ${statusLabel}
             </span>
 

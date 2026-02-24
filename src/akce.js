@@ -54,7 +54,7 @@ function renderEventCard(event, texts) {
   const isSoldOut = event.status === 'sold-out';
 
   const statusLabel = texts.statusLabels[event.status];
-  const statusColor = isPast ? 'gray' : isSoldOut ? 'red' : 'green';
+  const statusBadgeClass = isPast ? 'bg-gray-700' : isSoldOut ? 'bg-red-700' : 'bg-green-700';
 
   const coverImage = event.media && event.media.cover
     ? `${event.basePath}${event.media.cover}`
@@ -66,7 +66,12 @@ function renderEventCard(event, texts) {
   if (isPast) {
     buttonsHtml = `<a href="${detailUrl}" class="w-full block text-center px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:border-gray-900 hover:text-gray-900 transition-colors">${texts.buttons.showRecap}</a>`;
   } else if (isSoldOut) {
-    buttonsHtml = `<button disabled class="w-full block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>`;
+    buttonsHtml = `
+      <div class="grid grid-cols-2 gap-3">
+        <button disabled class="block px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">${texts.buttons.soldOut}</button>
+        <a href="${detailUrl}" class="block text-center px-4 py-2 border-2 border-blue-700 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors">${texts.buttons.learnMore}</a>
+      </div>
+    `;
   } else {
     buttonsHtml = `
       <div class="grid grid-cols-2 gap-3">
@@ -80,7 +85,7 @@ function renderEventCard(event, texts) {
     <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-gray-100 overflow-hidden flex flex-col h-full">
       <div class="relative h-48 sm:h-56 bg-gray-100 overflow-hidden group">
         <img src="${coverImage}" alt="${event.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-        <span class="absolute top-4 right-4 px-3 py-1 bg-${statusColor}-700 text-white text-sm font-bold rounded-full shadow-md">
+        <span class="absolute top-4 right-4 px-3 py-1 ${statusBadgeClass} text-white text-sm font-bold rounded-full shadow-lg ring-2 ring-white/30">
           ${statusLabel}
         </span>
       </div>
