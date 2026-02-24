@@ -40,17 +40,17 @@
   "events": {
     "heading": "Nadcházející akce",
     "subheading": "Žádné kravaty, žádné nudné prezentace - jen banda lidí, co se zajímají o AI 🎉",
-    "viewAllButton": "Zobrazit všechny akce →",
+    "viewAllButton": "Zobrazit všechny akce",
     "statusLabels": {
       "open": "Otevřeno",
       "sold-out": "Vyprodáno",
       "past": "Proběhlo"
     },
     "buttons": {
-      "buyTicket": "Koupit lístek",
+      "buyTicket": "Chci se zúčastnit",
       "learnMore": "Zjistit víc",
       "showRecap": "Zobrazit recap",
-      "soldOut": "Vyprodáno"
+      "soldOut": "Máme plno"
     },
     "infoLabels": {
       "date": "Datum",
