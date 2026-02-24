@@ -27,7 +27,7 @@
     "cta": [
       { "label": "Zjistit víc", "href": "#komunita", "style": "outline" },
       { "label": "Nejbližší akce", "href": "#akce", "style": "filled" },
-      { "label": "Přihlásit k odběru", "href": "https://mailchimp.com", "style": "secondary", "external": true }
+      { "label": "Přihlásit k odběru", "href": "#subscribe", "style": "secondary" }
     ],
     "stats": [
       { "value": "100+", "label": "Účastníků na první akci", "color": "blue" },

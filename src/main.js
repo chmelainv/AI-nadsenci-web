@@ -13,7 +13,7 @@ async function init() {
     ]);
 
     renderNavigation(texts.nav);
-    renderHero(texts.hero, events);
+    renderHero(texts.hero, events, partnersData.partners);
     // Homepage: show only 2 nearest upcoming events (or most recent if no upcoming)
     const upcoming = events.filter(e => e.status !== 'past');
     const past = events.filter(e => e.status === 'past');
@@ -24,13 +24,14 @@ async function init() {
     renderFooter(texts.footer);
 
     setupMobileMenu(texts.accessibility);
+    setupSubscribeModal();
 
   } catch (error) {
     console.error('Failed to initialize app:', error);
   }
 }
 
-function renderHero(hero, events) {
+function renderHero(hero, events, partners) {
   const container = document.querySelector('#hero .container');
   if (!container || !hero) return;
 
@@ -55,9 +56,9 @@ function renderHero(hero, events) {
 
   container.innerHTML = `
     <!-- Hero photo left -->
-    <img src="${BASE}images/events/hero-left.jpg" alt="" class="hidden xl:block absolute left-8 2xl:left-16 top-1/4 -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-left.jpg" alt="" class="hidden xl:block absolute left-8 2xl:left-16 top-[15%] -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
     <!-- Hero photo right -->
-    <img src="${BASE}images/events/hero-right.jpg" alt="" class="hidden xl:block absolute right-8 2xl:right-16 top-1/4 -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-right.jpg" alt="" class="hidden xl:block absolute right-8 2xl:right-16 top-[15%] -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
 
     <div class="max-w-2xl mx-auto xl:max-w-xl 2xl:max-w-2xl">
       <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
@@ -83,8 +84,7 @@ function renderHero(hero, events) {
     <div class="mt-8">
       <p class="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">${hero.partnersLabel}</p>
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-         <img src="${BASE}images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
-         <img src="${BASE}images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
+         ${partners.map(p => `<img src="${BASE}${p.logo}" alt="${p.name}" class="h-8 md:h-10 w-auto">`).join('')}
       </div>
     </div>
 
@@ -225,7 +225,7 @@ function renderCommunity(texts, organizers) {
 
   grid.innerHTML = organizers.map(org => `
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center hover:shadow-lg transition-shadow">
-      <img src="${org.image}" alt="${org.name}" class="w-32 h-32 rounded-full object-cover mb-4 ring-4 ring-blue-50">
+      <img src="${BASE}${org.image}" alt="${org.name}" class="w-32 h-32 rounded-full object-cover mb-4 ring-4 ring-blue-50">
       <h4 class="text-xl font-bold mb-1">${org.name}</h4>
       <p class="text-gray-600 text-sm mb-4 flex-grow">${org.bio}</p>
       <a href="${org.linkedin}" target="_blank" class="text-blue-700 hover:text-blue-900 p-2 rounded-full hover:bg-blue-50 transition-colors" aria-label="LinkedIn">
@@ -278,12 +278,48 @@ function renderPartners(texts, partners) {
       <div class="grid grid-cols-2 gap-8">
          ${partners.map(p => `
            <a href="${p.url}" target="_blank" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:shadow-md transition-shadow h-48 group">
-             <img src="${p.logo}" alt="${p.name}" class="max-h-16 w-auto opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all">
+             <img src="${BASE}${p.logo}" alt="${p.name}" class="max-h-16 w-auto opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all">
            </a>
          `).join('')}
       </div>
     </div>
   `;
+}
+
+function setupSubscribeModal() {
+  const modal = document.getElementById('subscribe-modal');
+  if (!modal) return;
+
+  const closeBtn = document.getElementById('subscribe-modal-close');
+
+  function open() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function close() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  // Open on any link with href="#subscribe"
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href="#subscribe"]');
+    if (link) {
+      e.preventDefault();
+      open();
+    }
+  });
+
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) close();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
+  });
 }
 
 init();
