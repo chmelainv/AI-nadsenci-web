@@ -55,23 +55,25 @@ function renderHero(hero, events) {
 
   container.innerHTML = `
     <!-- Hero photo left -->
-    <img src="${BASE}images/events/hero-left.jpg" alt="" class="hidden lg:block absolute left-8 xl:left-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-left.jpg" alt="" class="hidden xl:block absolute left-8 2xl:left-16 top-1/4 -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl -rotate-3 opacity-90 hover:opacity-100 hover:-rotate-1 transition-all duration-500 object-cover" />
     <!-- Hero photo right -->
-    <img src="${BASE}images/events/hero-right.jpg" alt="" class="hidden lg:block absolute right-8 xl:right-16 top-1/4 -translate-y-1/2 w-48 xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
+    <img src="${BASE}images/events/hero-right.jpg" alt="" class="hidden xl:block absolute right-8 2xl:right-16 top-1/4 -translate-y-1/2 w-48 2xl:w-64 rounded-2xl shadow-xl rotate-3 opacity-90 hover:opacity-100 hover:rotate-1 transition-all duration-500 object-cover" />
 
-    <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
-      <span class="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent">
-        ${hero.claim.line1}
-      </span><br/>
-      <span class="text-gray-900">${hero.claim.line2}</span>
-    </h1>
+    <div class="max-w-2xl mx-auto xl:max-w-xl 2xl:max-w-2xl">
+      <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight tracking-tight">
+        <span class="bg-gradient-to-r from-blue-700 via-purple-700 to-pink-700 bg-clip-text text-transparent">
+          ${hero.claim.line1}
+        </span><br/>
+        <span class="text-gray-900">${hero.claim.line2}</span>
+      </h1>
 
-    <div class="max-w-2xl mx-auto space-y-4 mb-10 text-lg md:text-xl text-gray-600 leading-relaxed">
-      ${hero.intro.map(p => `<p>${p}</p>`).join('')}
-    </div>
+      <div class="space-y-4 mb-10 text-lg md:text-xl text-gray-600 leading-relaxed">
+        ${hero.intro.map(p => `<p>${p}</p>`).join('')}
+      </div>
 
-    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 px-4">
-      ${ctaHtml}
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16 px-4">
+        ${ctaHtml}
+      </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 py-10 border-t border-gray-200">
@@ -83,6 +85,14 @@ function renderHero(hero, events) {
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
          <img src="${BASE}images/partners/gug-logo.svg" alt="GUG.cz" class="h-8 md:h-10 w-auto">
          <img src="${BASE}images/partners/cerna-kostka-logo.svg" alt="Černá Kostka" class="h-8 md:h-10 w-auto">
+      </div>
+    </div>
+
+    <div class="mt-12 max-w-3xl mx-auto">
+      <div class="rounded-2xl overflow-hidden shadow-lg">
+        <video controls playsinline class="w-full" poster="${BASE}content/events/20251002/media/cover1.png">
+          <source src="${BASE}content/events/20251002/media/fajne_ck_wide.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
   `;
