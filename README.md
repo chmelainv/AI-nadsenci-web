@@ -14,29 +14,30 @@ Komunitní web pro AI nadšence - neformální komunitu lidí v Moravskoslezské
 ## Struktura projektu
 ```
 AI-nadsenci-web/
-├── .github/workflows/    # CI/CD (GitHub Actions → Pages)
-├── akce/                 # Podstránky akcí
-│   ├── index.html        # Výpis všech akcí
-│   └── detail.html       # Detail akce (galerie, recap, video)
-├── content/              # JSON data
-│   ├── texts.json        # Globální texty, navigace, footer
-│   ├── organizers.json   # Organizátoři
-│   ├── partners.json     # Partneři
-│   └── events/           # Akce (každá ve vlastní složce)
-│       ├── index.json    # Seznam ID akcí
-│       └── {id}/         # Složka akce
-│           ├── event.json  # Data akce
-│           └── media/      # Cover, galerie, video
-├── public/               # Statické soubory (obrázky)
+├── .github/workflows/       # CI/CD (GitHub Actions → Pages)
+├── akce/                    # Podstránky akcí
+│   ├── index.html           # Výpis všech akcí
+│   └── detail.html          # Detail akce (galerie, recap, video)
+├── public/                  # Statické soubory (kopírují se do buildu)
+│   ├── content/             # JSON data
+│   │   ├── texts.json       # Globální texty, navigace, footer
+│   │   ├── organizers.json  # Organizátoři
+│   │   ├── partners.json    # Partneři (loga dynamicky v hero i sekci)
+│   │   └── events/          # Akce (každá ve vlastní složce)
+│   │       ├── index.json   # Seznam ID akcí
+│   │       └── {id}/        # Složka akce
+│   │           ├── event.json  # Data akce
+│   │           └── media/      # Cover, galerie, video
+│   └── images/              # Obrázky (partneři, tým, eventy)
 ├── src/
-│   ├── style.css         # Tailwind entry point
-│   ├── main.js           # Homepage logika
-│   ├── shared.js         # Sdílené komponenty (nav, footer, menu)
-│   ├── akce.js           # Výpis akcí
-│   └── akce-detail.js    # Detail akce + lightbox galerie
-├── index.html            # Homepage
-├── vite.config.js        # Build konfigurace (multi-page)
-└── tailwind.config.js    # Tailwind konfigurace
+│   ├── style.css            # Tailwind entry point
+│   ├── main.js              # Homepage logika + subscribe modal
+│   ├── shared.js            # Sdílené komponenty (nav, footer, menu)
+│   ├── akce.js              # Výpis akcí
+│   └── akce-detail.js       # Detail akce + lightbox galerie
+├── index.html               # Homepage (+ subscribe modal)
+├── vite.config.js           # Build konfigurace (multi-page)
+└── tailwind.config.js       # Tailwind konfigurace
 ```
 
 ## Instalace a spuštění
@@ -50,13 +51,13 @@ npm run preview   # Náhled produkčního buildu
 
 ## Správa obsahu
 
-Veškerý obsah je v JSON souborech ve složce `content/`.
+Veškerý obsah je v JSON souborech ve složce `public/content/`.
 
 ### Přidání nové akce
-1. Vytvoř složku `content/events/{YYYYMMDD}/`
+1. Vytvoř složku `public/content/events/{YYYYMMDD}/`
 2. Přidej `event.json` s daty akce (viz existující akce jako vzor)
 3. Přidej cover obrázek do `media/`
-4. Přidej ID do `content/events/index.json`
+4. Přidej ID do `public/content/events/index.json`
 
 ### Statusy akcí
 - `open` - nadcházející, prodej lístků otevřen
@@ -64,12 +65,21 @@ Veškerý obsah je v JSON souborech ve složce `content/`.
 - `past` - proběhlá (zobrazí recap, galerii, video)
 
 ### Galerie a recap (pro proběhlé akce)
-- Fotky přidej do `content/events/{id}/media/` a vyplň pole `gallery` v `event.json`
+- Fotky přidej do `public/content/events/{id}/media/` a vyplň pole `gallery` v `event.json`
 - Recap video přidej do `media/` a vyplň `media.recap`
 - Text recapu vyplň v `recapText`
 
+### Partneři a organizátoři
+- Loga partnerů: `public/images/partners/` + aktualizuj `public/content/partners.json`
+- Fotky organizátorů: `public/images/team/` + aktualizuj `public/content/organizers.json`
+- Loga partnerů se zobrazují dynamicky v hero sekci i v sekci partnerů
+
+### Subscribe formulář
+- Embed od SmartEmailing v modalu (`index.html`)
+- Otevírá se klikem na "Přihlásit k odběru" (href `#subscribe`)
+
 ### Stránky
-- **Homepage** (`/`) - zobrazuje max 2 nejbližší akce
+- **Homepage** (`/`) - zobrazuje max 2 nejbližší akce, video recap, subscribe modal
 - **Výpis akcí** (`/akce/`) - všechny akce (nadcházející + proběhlé)
 - **Detail akce** (`/akce/detail.html?id={id}`) - plný detail s galerií a lightboxem
 

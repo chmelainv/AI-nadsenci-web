@@ -87,9 +87,9 @@
       "Možnost prezentace vašich AI řešení"
     ],
     "cta": [
-      { "label": "Stát se partnerem", "href": "mailto:filip@gug.cz", "style": "outline" },
-      { "label": "Zjistit víc o partnerství", "href": "#partneri", "style": "secondary" }
-    ]
+      { "label": "Stát se partnerem", "href": "https://docs.google.com/document/d/14-c2s2Qp6EmbHX0MbNOhaqkqaDn2qXbGIIn2vAW325o/edit?usp=sharing", "style": "outline" }
+    ],
+    "partnershipDocUrl": ""
   },
 
   "footer": {

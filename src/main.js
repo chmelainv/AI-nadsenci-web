@@ -252,7 +252,9 @@ function renderPartners(texts, partners) {
       ? 'text-gray-600 hover:text-blue-700 underline'
       : 'border-2 border-blue-700 text-blue-700 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium';
 
-    return `<a href="${btn.href}" class="${classes} transition-colors inline-block text-center">${btn.label}</a>`;
+    const isExternal = btn.href.startsWith('http');
+    const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+    return `<a href="${btn.href}"${targetAttr} class="${classes} transition-colors inline-block text-center">${btn.label}</a>`;
   }).join('');
 
   container.innerHTML = `
