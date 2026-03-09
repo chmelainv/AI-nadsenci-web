@@ -284,11 +284,12 @@ function renderPartners(texts, partners) {
          ${partners.map(p => {
            const linkUrl = p.linkedin || p.url;
            const inner = p.logo
-             ? `<img src="${BASE}${p.logo}" alt="${p.name}" class="max-h-16 w-auto opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all">`
+             ? `<img src="${BASE}${p.logo}" alt="${p.name}" class="w-full h-full object-contain opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all p-4">`
              : `<span class="text-lg font-bold text-gray-700 group-hover:text-blue-700 transition-colors text-center">${p.name}</span>`;
+           const cardClass = "bg-white rounded-xl shadow-sm border border-gray-100 flex items-center justify-center w-full h-36 overflow-hidden";
            return linkUrl
-             ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:shadow-md transition-shadow h-48 group">${inner}</a>`
-             : `<div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center h-48">${inner}</div>`;
+             ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="${cardClass} hover:shadow-md transition-shadow group">${inner}</a>`
+             : `<div class="${cardClass}">${inner}</div>`;
          }).join('')}
       </div>
     </div>

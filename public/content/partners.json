@@ -10,20 +10,9 @@
     {
       "id": 2,
       "name": "Raynet",
-      "logo": "images/partners/Raynet_logo_zakladni_1250x460px.png",
+      "logo": "images/partners/Raynet_logo_zakladni_1250x460px_b.png",
       "url": "https://raynet.cz",
       "description": "Jednoduchý CRM systém"
-    },
-    {
-      "id": 3,
-      "name": "Mira Vlach",
-      "url": "https://lnkedin.com/in/mira-vlach",
-      "description": "Specialista na projektové řízení, organizátor Strategického bootcampu"
-    },
-    {
-      "id": 4,
-      "name": "Jan Štěrba",
-      "description": "Investor, nadšenec do AI"
     },
     {
       "id": 5,
@@ -31,6 +20,17 @@
       "logo": "images/partners/Keysmash-logo.svg",
       "url": "https://keysmash.cz",
       "description": "Váš IT terapeut"
+    },
+    {
+      "id": 4,
+      "name": "Mira Vlach",
+      "url": "https://lnkedin.com/in/mira-vlach",
+      "description": "Specialista na projektové řízení, organizátor Strategického bootcampu"
+    },
+    {
+      "id": 3,
+      "name": "Jan Štěrba",
+      "description": "Investor, nadšenec do AI"
     }
   ]
 }
