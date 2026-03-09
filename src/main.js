@@ -84,7 +84,10 @@ function renderHero(hero, events, partners) {
     <div class="mt-8">
       <p class="text-sm text-gray-400 font-bold tracking-widest uppercase mb-4">${hero.partnersLabel}</p>
       <div class="flex gap-8 justify-center items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-         ${partners.map(p => `<img src="${BASE}${p.logo}" alt="${p.name}" class="h-8 md:h-10 w-auto">`).join('')}
+         ${partners.map(p => p.logo
+           ? `<img src="${BASE}${p.logo}" alt="${p.name}" class="h-8 md:h-10 w-auto">`
+           : `<span class="text-sm font-semibold text-gray-600">${p.name}</span>`
+         ).join('')}
       </div>
     </div>
 
@@ -278,11 +281,15 @@ function renderPartners(texts, partners) {
       </div>
 
       <div class="grid grid-cols-2 gap-8">
-         ${partners.map(p => `
-           <a href="${p.url}" target="_blank" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:shadow-md transition-shadow h-48 group">
-             <img src="${BASE}${p.logo}" alt="${p.name}" class="max-h-16 w-auto opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all">
-           </a>
-         `).join('')}
+         ${partners.map(p => {
+           const linkUrl = p.linkedin || p.url;
+           const inner = p.logo
+             ? `<img src="${BASE}${p.logo}" alt="${p.name}" class="max-h-16 w-auto opacity-70 group-hover:opacity-100 grayscale group-hover:grayscale-0 transition-all">`
+             : `<span class="text-lg font-bold text-gray-700 group-hover:text-blue-700 transition-colors text-center">${p.name}</span>`;
+           return linkUrl
+             ? `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center hover:shadow-md transition-shadow h-48 group">${inner}</a>`
+             : `<div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 flex items-center justify-center h-48">${inner}</div>`;
+         }).join('')}
       </div>
     </div>
   `;
