@@ -9,10 +9,28 @@
     },
     {
       "id": 2,
-      "name": "Černá Kostka",
-      "logo": "/images/partners/cerna-kostka-logo.png",
-      "url": "https://cernakostka.cz",
-      "description": "Kreativní hub v Ostravě"
+      "name": "Raynet",
+      "logo": "/images/partners/raynet-logo.png",
+      "url": "https://raynet.cz",
+      "description": "Jednoduchý CRM systém"
+    },
+    {
+      "id": 3,
+      "name": "Mira Vlach",
+      "url": "https://lnkedin.com/in/mira-vlach",
+      "description": "Specialista na projektové řízení, organizátor Strategického bootcampu"
+    },
+    {
+      "id": 4,
+      "name": "Jan Štěrba",
+      "description": "Investor, nadšenec do AI"
+    },
+    {
+      "id": 5,
+      "name": "Keysmash",
+      "logo": "/images/partners/keysmash-logo.png",
+      "url": "https://keysmash.cz",
+      "description": "Váš IT terapeut"
     }
   ]
 }
