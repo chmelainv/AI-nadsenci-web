@@ -3,14 +3,14 @@
     {
       "id": 1,
       "name": "GUG.cz",
-      "logo": "/images/partners/gug-logo.png",
+      "logo": "/images/partners/gug_logo_big.png",
       "url": "https://gug.cz",
       "description": "Google User Group Czech Republic"
     },
     {
       "id": 2,
       "name": "Raynet",
-      "logo": "/images/partners/raynet-logo.png",
+      "logo": "/images/partners/Raynet_logo_zakladni_1250x460px.png",
       "url": "https://raynet.cz",
       "description": "Jednoduchý CRM systém"
     },
@@ -28,7 +28,7 @@
     {
       "id": 5,
       "name": "Keysmash",
-      "logo": "/images/partners/keysmash-logo.png",
+      "logo": "/images/partners/Keysmash-logo.svg",
       "url": "https://keysmash.cz",
       "description": "Váš IT terapeut"
     }
