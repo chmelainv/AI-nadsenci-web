@@ -15,7 +15,7 @@
       "description": "Jednoduchý CRM systém"
     },
     {
-      "id": 5,
+      "id": 3,
       "name": "Keysmash",
       "logo": "images/partners/Keysmash-logo.svg",
       "url": "https://keysmash.cz",
@@ -23,12 +23,20 @@
     },
     {
       "id": 4,
-      "name": "Mira Vlach",
-      "url": "https://lnkedin.com/in/mira-vlach",
-      "description": "Specialista na projektové řízení, organizátor Strategického bootcampu"
+      "name": "Strtategický bootcamp",
+      "logo": "images/partners/logo_strategicky_bootcamp.png",
+      "url": "https://www.linkedin.com/company/strategicky-bootcamp/",
+      "description": "Strukturované prostředí pro realizaci důležitých cílů a projektů. Jeden cíl. Šest týdnů. Reálný výsledek a přínosy."
     },
     {
-      "id": 3,
+      "id": 5,
+      "name": "Premium Systems",
+      "logo": "images/partners/Logo-premium-systems.webp",
+      "url": "https://premiumsystems.cz",
+      "description": "Business Continuity - Když přijde nečekané, ostatní panikaří. Vy pokračujete."
+    },
+    {
+      "id": 6,
       "name": "Jan Štěrba",
       "description": "Investor, nadšenec do AI"
     }
