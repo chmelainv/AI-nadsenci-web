@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Odevzdat aktivitu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- ── Header ── -->
+  <header class="bg-white border-b border-gray-200 px-5 py-3 text-center">
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">Fajne prompty</p>
+    <h1 class="text-xl font-black text-gray-900">Odevzdání aktivity</h1>
+  </header>
+
+  <main class="max-w-lg mx-auto px-4 py-8">
+
+    <!-- ── Stav: webhook není nakonfigurován ── -->
+    <div id="not-configured" class="hidden bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
+      <p class="text-yellow-800 font-semibold mb-1">Formulář není ještě aktivní</p>
+      <p class="text-yellow-700 text-sm">Nastavte WEBHOOK_URL v kódu stránky.</p>
+    </div>
+
+    <!-- ── Formulář ── -->
+    <form id="form" class="hidden space-y-5" onsubmit="handleSubmit(event)">
+
+      <!-- Tým -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+          Název týmu
+        </label>
+        <input type="text" id="team" name="team" required maxlength="100"
+          placeholder="Váš tým"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+      </div>
+
+      <!-- Popis -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+          Popis aktivity
+        </label>
+        <textarea id="description" name="description" required maxlength="1000" rows="4"
+          placeholder="Co jste vymysleli / vytvořili…"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-white"></textarea>
+        <p id="desc-count" class="text-xs text-gray-400 mt-1 text-right">0 / 1000</p>
+      </div>
+
+      <!-- Fotka -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+          Fotka
+        </label>
+        <label class="block cursor-pointer">
+          <div id="photo-zone"
+            class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 active:border-blue-500 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <p class="text-gray-500 text-sm font-medium">Klikni pro výběr fotky</p>
+            <p class="text-gray-400 text-xs mt-1">nebo ji sem přetáhni</p>
+          </div>
+          <input type="file" id="photo" accept="image/*" capture="environment" class="hidden">
+        </label>
+        <p class="text-xs text-gray-400 mt-1.5">Fotka bude automaticky zmenšena.</p>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" id="submit-btn"
+        class="w-full py-4 bg-blue-700 text-white rounded-2xl font-bold text-lg hover:bg-blue-800 active:scale-95 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+        Odeslat
+      </button>
+
+    </form>
+
+    <!-- ── Stav: odesílám ── -->
+    <div id="state-sending" class="hidden text-center py-16 space-y-3">
+      <div class="w-12 h-12 border-4 border-blue-700 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p id="sending-label" class="text-gray-600 font-medium">Odesílám…</p>
+    </div>
+
+    <!-- ── Stav: úspěch ── -->
+    <div id="state-success" class="hidden text-center py-12 space-y-4">
+      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-black text-gray-900">Odesláno!</h2>
+      <p class="text-gray-500">Vaše aktivita byla úspěšně odeslána.</p>
+    </div>
+
+    <!-- ── Stav: chyba ── -->
+    <div id="state-error" class="hidden text-center py-12 space-y-4">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+      <h2 class="text-2xl font-black text-gray-900">Něco se pokazilo</h2>
+      <p id="error-msg" class="text-gray-500 text-sm"></p>
+      <button onclick="resetForm()"
+        class="px-6 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+        Zkusit znovu
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    // ── Konfigurace ────────────────────────────────────────────────────────
+    // Sem doplň URL n8n webhooku až bude připravený:
+    const WEBHOOK_URL = '';
+
+    // Maximální rozměr fotky po resize (px) a kvalita JPEG (0–1)
+    const PHOTO_MAX_PX  = 1200;
+    const PHOTO_QUALITY = 0.82;
+    // ──────────────────────────────────────────────────────────────────────
+
+    let resizedBlob = null;
+
+    window.addEventListener('load', () => {
+      if (!WEBHOOK_URL) {
+        document.getElementById('not-configured').classList.remove('hidden');
+        return;
+      }
+
+      // Předvyplnění týmu z URL param
+      const team = new URLSearchParams(location.search).get('team') || '';
+      if (team) document.getElementById('team').value = team;
+
+      document.getElementById('form').classList.remove('hidden');
+
+      // Počítadlo znaků popisu
+      document.getElementById('description').addEventListener('input', e => {
+        document.getElementById('desc-count').textContent = `${e.target.value.length} / 1000`;
+      });
+
+      // Foto picker
+      document.getElementById('photo').addEventListener('change', handlePhoto);
+
+      // Drag & drop
+      const zone = document.getElementById('photo-zone');
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-blue-400'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('border-blue-400'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove('border-blue-400');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) processPhoto(file);
+      });
+    });
+
+    // ── Zpracování fotky ───────────────────────────────────────────────────
+    function handlePhoto(e) {
+      const file = e.target.files[0];
+      if (file) processPhoto(file);
+    }
+
+    function processPhoto(file) {
+      if (file.size > 20 * 1024 * 1024) {
+        alert('Fotka je příliš velká (max 20 MB před zmenšením).');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          // Resize přes Canvas
+          let { width, height } = img;
+          if (width > PHOTO_MAX_PX || height > PHOTO_MAX_PX) {
+            if (width > height) { height = Math.round(height * PHOTO_MAX_PX / width); width = PHOTO_MAX_PX; }
+            else                { width = Math.round(width * PHOTO_MAX_PX / height);  height = PHOTO_MAX_PX; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          canvas.toBlob(blob => {
+            resizedBlob = blob;
+            const url = URL.createObjectURL(blob);
+            const sizeKB = Math.round(blob.size / 1024);
+            document.getElementById('photo-zone').innerHTML = `
+              <img src="${url}" class="max-h-48 mx-auto rounded-lg object-contain mb-2">
+              <p class="text-xs text-gray-400">${width}×${height}px · ${sizeKB} kB · Klikni pro změnu</p>
+            `;
+          }, 'image/jpeg', PHOTO_QUALITY);
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Odeslání ───────────────────────────────────────────────────────────
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const team        = document.getElementById('team').value.trim();
+      const description = document.getElementById('description').value.trim();
+
+      if (!resizedBlob) {
+        alert('Přidej prosím fotku.');
+        return;
+      }
+
+      setState('sending');
+      setSendingLabel('Odesílám…');
+
+      try {
+        const fd = new FormData();
+        fd.append('team',        team);
+        fd.append('description', description);
+        fd.append('photo',       resizedBlob, `foto-${Date.now()}.jpg`);
+
+        const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
+
+        if (!res.ok) throw new Error(`Server vrátil ${res.status}`);
+
+        setState('success');
+      } catch (err) {
+        document.getElementById('error-msg').textContent = err.message || 'Neznámá chyba. Zkus to prosím znovu.';
+        setState('error');
+      }
+    }
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function setState(s) {
+      ['form', 'state-sending', 'state-success', 'state-error'].forEach(id =>
+        document.getElementById(id).classList.add('hidden')
+      );
+      if (s === 'sending') document.getElementById('state-sending').classList.remove('hidden');
+      else if (s === 'success') document.getElementById('state-success').classList.remove('hidden');
+      else if (s === 'error') document.getElementById('state-error').classList.remove('hidden');
+      else document.getElementById('form').classList.remove('hidden');
+    }
+
+    function setSendingLabel(text) {
+      document.getElementById('sending-label').textContent = text;
+    }
+
+    function resetForm() {
+      resizedBlob = null;
+      document.getElementById('form').reset();
+      const team = new URLSearchParams(location.search).get('team') || '';
+      if (team) document.getElementById('team').value = team;
+      document.getElementById('photo-zone').innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <p class="text-gray-500 text-sm font-medium">Klikni pro výběr fotky</p>
+        <p class="text-gray-400 text-xs mt-1">nebo ji sem přetáhni</p>
+      `;
+      setState('form');
+    }
+  </script>
+</body>
+</html>
