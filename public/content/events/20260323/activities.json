@@ -1,0 +1,22 @@
+{
+  "eventId": "20260323",
+  "title": "Aktivity Fajne Prompty #2",
+  "activities": [
+    {
+      "id": "1774187390203",
+      "title": "Test rozcestník 2",
+      "description": "Pokračování legendární párty AI nadšenců ve velkém stylu.\n​​AI není jen o algoritmech, ale i o lidech, co je dokážou pořádně roztočit. 🥳\n\n​​Přijď si pokecat, poslechnout příběhy z praxe, dát si pivo nebo limo a zjistit, že fajne prompty se rodí jen v Ostravě!!! 🙌\n\n​​Žádné kravaty, žádné nudné prezentace – jen banda lidí, co se zajímají o AI a chtějí potkat podobně postižené.\n\n​​A neboj, nejsme tu jen pro ajťáky – přijď, i když zatím používáš AI jen na recepty z másla a taveného sýra. U nás se chytí každý. 🧀 😅\n\n​​Program\n​17:00 – Doors open & networking Příchod, drink v ruce, první rozhovory. Staří známí i noví lidé z kraje, kteří řeší podobné výzvy.\n\n​17:30–18:30 – Mash-up: AI scénáře z praxe Krátké, svižné vstupy. Reálné AI use-casy od lidí pro lidi. Žádná teorie – jen to, co skutečně funguje.\n\n​18:30–19:30 – Offline aktivita Prostor se potkat jinak než u small talku. Lehké vytržení z rutiny, které rozhýbe hlavu i konverzace.\n\n​Od 19:45 – Kulturní vložka, párty & neformální networking Zesilujeme hudbu. Tlachání, smích, nápady. BO!!! nás to baví.",
+      "url": "https://luma.com/v53d83p4?tk=BN6FAM",
+      "btnLabel": "Otevřít",
+      "photo": "/images/events/20260323/activities/1774187390203.png"
+    },
+    {
+      "id": "1774187489156",
+      "title": "karta 2",
+      "description": "Agents Work Locally, Break in Production\nBuild two production agents, fully deployed\n\nBuild Research Agent and Writing Workflow with full evaluation systems, observability, and deployment pipelines. These are production templates you can adapt for market research, content & report generation, diagrams, documentation, or any domain where autonomous intelligence and automations with agentic patterns add value.\n\nNot Sure When Agents Are Worth It\nMaster the decision framework\n\nLearn to design workflows that stay maintainable as requirements evolve. Master when to use deterministic routing versus agent autonomy, when to keep humans in the loop, and the patterns that scale from prototype to production.",
+      "url": "https://academy.towardsai.net/",
+      "btnLabel": "Otevřít",
+      "photo": "/images/events/20260323/activities/1774187489156.png"
+    }
+  ]
+}
