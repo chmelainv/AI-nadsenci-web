@@ -18,9 +18,15 @@
 <body class="bg-gray-50 min-h-screen">
 
   <!-- Header -->
-  <header class="bg-white border-b border-gray-200 px-5 py-4 text-center">
-    <p class="text-xs text-gray-400 uppercase tracking-widest font-medium mb-1">Fajne prompty</p>
-    <h1 id="page-title" class="text-2xl font-black text-gray-900">Aktivity</h1>
+  <header class="bg-white border-b border-gray-200 px-5 py-3">
+    <div class="max-w-3xl mx-auto flex items-center justify-between gap-4">
+      <a href="/" class="text-sm text-gray-400 hover:text-gray-700 transition-colors whitespace-nowrap">← Web</a>
+      <div class="text-center flex-1 min-w-0">
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-medium">Fajne prompty</p>
+        <h1 id="page-title" class="text-xl font-black text-gray-900 truncate">Aktivity</h1>
+      </div>
+      <a id="event-link" href="#" class="text-sm text-blue-700 hover:underline font-medium whitespace-nowrap hidden">Detail akce →</a>
+    </div>
   </header>
 
   <main class="max-w-3xl mx-auto px-4 py-8">
@@ -46,6 +52,10 @@
 
         if (data.title) document.getElementById('page-title').textContent = data.title;
         document.title = data.title || 'Aktivity';
+
+        const eventLink = document.getElementById('event-link');
+        eventLink.href = `/akce/detail.html?id=${eventId}`;
+        eventLink.classList.remove('hidden');
 
         renderGrid(data.activities);
       } catch (e) {
