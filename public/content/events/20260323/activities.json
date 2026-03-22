@@ -65,6 +65,14 @@
       "url": "",
       "btnLabel": "Otevřít",
       "photo": null
+    },
+    {
+      "id": "1774217039310",
+      "title": "Test Tym3",
+      "description": "UI komponenty (shadcn/ui, Tailwind, layout, header, footer)\r\nDesign systém (barvy, typografie, responzivita, dark mode)\r\nAuth flow základ (registrační formulář, login page)\r\nQR attendance logika (adaptace API + UI)\r\nNetworking hra (adaptace)",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774217039310.jpg"
     }
   ]
 }
