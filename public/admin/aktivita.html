@@ -242,34 +242,29 @@
       qrSection.classList.remove('hidden');
     }
 
-    // ── GitHub API helpers ────────────────────────────────────────────────
-    async function getFileSha(token, path) {
-      const res = await fetch(`${API_BASE}/repos/${REPO}/contents/${path}`, {
-        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-      });
-      if (res.ok) return (await res.json()).sha;
-      return null;
+    // ── GitHub API — atomický commit přes Trees API ───────────────────────
+    // files = [{ path, base64 }]  — vše v jednom commitu, jeden build
+    async function commitFiles(token, files, message) {
+      const h = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+      const api = (p, m = 'GET', b) => fetch(`${API_BASE}/repos/${REPO}/${p}`, { method: m, headers: h, body: b ? JSON.stringify(b) : undefined }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; });
+
+      const head      = await api('git/refs/heads/main');
+      const parentSha = head.object.sha;
+      const commit    = await api(`git/commits/${parentSha}`);
+      const treeSha   = commit.tree.sha;
+
+      // Vytvoř blob pro každý soubor
+      const treeItems = await Promise.all(files.map(async f => {
+        const blob = await api('git/blobs', 'POST', { content: f.base64, encoding: 'base64' });
+        return { path: f.path, mode: '100644', type: 'blob', sha: blob.sha };
+      }));
+
+      const newTree   = await api('git/trees', 'POST', { base_tree: treeSha, tree: treeItems });
+      const newCommit = await api('git/commits', 'POST', { message, tree: newTree.sha, parents: [parentSha] });
+      await api('git/refs/heads/main', 'PATCH', { sha: newCommit.sha });
     }
 
-    async function putFile(token, path, base64Content, message, sha) {
-      const body = { message, content: base64Content };
-      if (sha) body.sha = sha;
-      const res = await fetch(`${API_BASE}/repos/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${res.status}`);
-      }
-    }
-
-    function toBase64(file) {
+    function fileToBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = e => resolve(e.target.result.split(',')[1]);
@@ -287,10 +282,10 @@
       const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh_token');
       if (!token) { setStatus('error', '⚠ Chybí GitHub token'); return; }
 
-      const title = document.getElementById('title').value.trim();
+      const title       = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
-      const url = document.getElementById('url').value.trim();
-      const btnLabel = document.getElementById('btn-label').value.trim();
+      const url         = document.getElementById('url').value.trim();
+      const btnLabel    = document.getElementById('btn-label').value.trim();
 
       if (!title || !description || !url) {
         setStatus('error', '⚠ Vyplň název, popis a URL');
@@ -299,28 +294,27 @@
 
       const btn = document.getElementById('publish-btn');
       btn.disabled = true;
+      setStatus('loading', 'Publikuji…');
 
       try {
         let photoPath = currentPhoto;
+        const files = [];
 
-        // 1. Upload photo if selected
+        // Fotka (pokud je nová)
         if (selectedFile) {
-          setStatus('loading', 'Nahrávám fotku…');
           const ext = selectedFile.name.split('.').pop().toLowerCase() || 'jpg';
-          const repoPhotoPath = `public/images/activity/photo.${ext}`;
-          const base64 = await toBase64(selectedFile);
-          const sha = await getFileSha(token, repoPhotoPath);
-          await putFile(token, repoPhotoPath, base64, 'chore: update activity photo', sha);
           photoPath = `/images/activity/photo.${ext}`;
-          currentPhoto = photoPath;
+          files.push({ path: `public/images/activity/photo.${ext}`, base64: await fileToBase64(selectedFile) });
         }
 
-        // 2. Update activity.json
-        setStatus('loading', 'Ukládám obsah…');
+        // activity.json
         const newContent = { title, description, url, btnLabel, photo: photoPath };
-        const jsonSha = await getFileSha(token, 'public/content/activity.json');
-        await putFile(token, 'public/content/activity.json', jsonToBase64(newContent), 'chore: update activity content', jsonSha);
+        files.push({ path: 'public/content/activity.json', base64: jsonToBase64(newContent) });
 
+        await commitFiles(token, files, 'chore: update activity');
+
+        currentPhoto = photoPath;
+        selectedFile = null;
         setStatus('success', '✓ Publikováno! Build běží, za ~90 sec bude živé.');
         showQr();
       } catch (e) {

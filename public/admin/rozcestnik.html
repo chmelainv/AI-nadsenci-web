@@ -405,30 +405,25 @@
       reader.readAsDataURL(file);
     }
 
-    // ── GitHub API ──────────────────────────────────────────────────────
-    async function getFileSha(token, path) {
-      const res = await fetch(`${API}/repos/${REPO}/contents/${path}`, {
-        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
-      });
-      return res.ok ? (await res.json()).sha : null;
-    }
+    // ── GitHub API — atomický commit přes Trees API ──────────────────────
+    // files = [{ path, base64 }]  — vše v jednom commitu, jeden build
+    async function commitFiles(token, files, message) {
+      const h = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+      const api = (p, m = 'GET', b) => fetch(`${API}/repos/${REPO}/${p}`, { method: m, headers: h, body: b ? JSON.stringify(b) : undefined }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`); return d; });
 
-    async function putFile(token, path, base64Content, message, sha) {
-      const body = { message, content: base64Content };
-      if (sha) body.sha = sha;
-      const res = await fetch(`${API}/repos/${REPO}/contents/${path}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${res.status}`);
-      }
+      const head      = await api('git/refs/heads/main');
+      const parentSha = head.object.sha;
+      const commit    = await api(`git/commits/${parentSha}`);
+      const treeSha   = commit.tree.sha;
+
+      const treeItems = await Promise.all(files.map(async f => {
+        const blob = await api('git/blobs', 'POST', { content: f.base64, encoding: 'base64' });
+        return { path: f.path, mode: '100644', type: 'blob', sha: blob.sha };
+      }));
+
+      const newTree   = await api('git/trees', 'POST', { base_tree: treeSha, tree: treeItems });
+      const newCommit = await api('git/commits', 'POST', { message, tree: newTree.sha, parents: [parentSha] });
+      await api('git/refs/heads/main', 'PATCH', { sha: newCommit.sha });
     }
 
     function fileToBase64(file) {
@@ -455,28 +450,22 @@
 
       const btn = document.getElementById('publish-btn');
       btn.disabled = true;
+      setStatus('loading', 'Připravuji…');
 
       try {
-        let uploaded = 0;
-        const total = state.cards.filter(c => c._file).length;
+        const files = [];
 
-        // Upload photos
+        // Fotky nových/změněných karet
         for (const card of state.cards) {
           if (!card._file) continue;
-          uploaded++;
-          setStatus('loading', `Nahrávám fotku ${uploaded}/${total}…`);
           const ext  = card._file.name.split('.').pop().toLowerCase() || 'jpg';
-          const path = `public/images/events/${state.eventId}/activities/${card.id}.${ext}`;
-          const b64  = await fileToBase64(card._file);
-          const sha  = await getFileSha(token, path);
-          await putFile(token, path, b64, 'chore: add activity photo', sha);
           card.photo = `/images/events/${state.eventId}/activities/${card.id}.${ext}`;
+          files.push({ path: `public/images/events/${state.eventId}/activities/${card.id}.${ext}`, base64: await fileToBase64(card._file) });
           card._file = null;
           card._previewUrl = null;
         }
 
-        // Save activities.json
-        setStatus('loading', 'Ukládám obsah…');
+        // activities.json
         const pageTitle = document.getElementById('page-title').value.trim();
         const payload = {
           eventId: state.eventId,
@@ -484,11 +473,12 @@
           activities: state.cards.map(({ id, title, description, url, btnLabel, photo }) =>
             ({ id, title, description, url, btnLabel, photo })),
         };
-        const jsonPath = `public/content/events/${state.eventId}/activities.json`;
-        const jsonSha  = await getFileSha(token, jsonPath);
-        await putFile(token, jsonPath, jsonToBase64(payload), 'chore: update activities', jsonSha);
+        files.push({ path: `public/content/events/${state.eventId}/activities.json`, base64: jsonToBase64(payload) });
 
-        setStatus('success', `✓ Publikováno! Build běží, za ~90 sec bude živé.`);
+        setStatus('loading', `Publikuji (${files.length} souborů)…`);
+        await commitFiles(token, files, 'chore: update activities');
+
+        setStatus('success', '✓ Publikováno! Build běží, za ~90 sec bude živé.');
         showQr();
       } catch (e) {
         setStatus('error', '✗ Chyba: ' + e.message);
