@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Rozcestník</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Top bar -->
+  <header class="bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between sticky top-0 z-20">
+    <div class="flex items-center gap-3">
+      <span class="text-lg font-bold text-gray-900">Admin</span>
+      <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">rozcestník</span>
+    </div>
+    <a id="preview-link" href="#" target="_blank"
+      class="text-sm text-blue-700 hover:underline font-medium hidden">
+      Zobrazit stránku →
+    </a>
+  </header>
+
+  <div class="max-w-4xl mx-auto p-5 space-y-4">
+
+    <!-- Token -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h2 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <span class="step-badge">1</span>GitHub token
+      </h2>
+      <div class="flex gap-2">
+        <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx"
+          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        <button onclick="saveToken()"
+          class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+          Uložit
+        </button>
+      </div>
+      <p id="token-status" class="text-xs text-gray-400 mt-2"></p>
+    </div>
+
+    <!-- Event selector -->
+    <div class="bg-white rounded-xl border border-gray-200 p-5">
+      <h2 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+        <span class="step-badge">2</span>Akce
+      </h2>
+      <div class="flex gap-2">
+        <select id="event-select"
+          class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">— vyber akci —</option>
+        </select>
+        <button onclick="loadEvent()"
+          class="px-4 py-2 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors">
+          Načíst
+        </button>
+      </div>
+
+      <!-- Page title -->
+      <div id="title-section" class="hidden mt-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Název stránky rozcestníku</label>
+        <input type="text" id="page-title" placeholder="Aktivity — Fajne prompty #2"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div id="cards-section" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold text-gray-900 flex items-center gap-2">
+          <span class="step-badge">3</span>Karty
+          <span id="cards-count" class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"></span>
+        </h2>
+        <button onclick="addCard()"
+          class="flex items-center gap-1.5 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          Přidat kartu
+        </button>
+      </div>
+
+      <div id="cards-list" class="space-y-3"></div>
+
+      <div id="empty-state" class="hidden bg-white rounded-xl border border-dashed border-gray-200 p-10 text-center">
+        <p class="text-gray-400 text-sm">Žádné karty. Klikni „Přidat kartu".</p>
+      </div>
+    </div>
+
+    <!-- Publish -->
+    <div id="publish-section" class="hidden">
+      <button onclick="publish()" id="publish-btn"
+        class="w-full py-3 bg-blue-700 text-white rounded-xl font-bold text-base hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+        Publikovat
+      </button>
+      <div id="status" class="text-center text-sm mt-3 min-h-5"></div>
+
+      <!-- QR -->
+      <div id="qr-section" class="hidden bg-white rounded-xl border border-gray-200 p-5 text-center mt-4">
+        <p class="text-sm font-medium text-gray-700 mb-3">QR kód rozcestníku</p>
+        <img id="qr-img" src="" alt="QR kód" class="mx-auto rounded-lg">
+        <p id="qr-url" class="text-xs text-gray-400 mt-2 break-all"></p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Card template (hidden) -->
+  <template id="card-tpl">
+    <div class="card-editor bg-white rounded-xl border border-gray-200 overflow-hidden" data-id="">
+
+      <!-- Card header -->
+      <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200 cursor-pointer"
+        onclick="toggleCard(this)">
+        <div class="flex items-center gap-3">
+          <div class="card-thumb w-8 h-8 rounded-lg bg-gray-200 overflow-hidden flex-shrink-0">
+            <img class="thumb-img hidden w-full h-full object-cover">
+          </div>
+          <span class="card-label text-sm font-medium text-gray-700">Nová karta</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="moveCard(this.closest('.card-editor'), -1)" title="Nahoru"
+            class="p-1 text-gray-400 hover:text-gray-700 transition-colors">↑</button>
+          <button onclick="moveCard(this.closest('.card-editor'), 1)" title="Dolů"
+            class="p-1 text-gray-400 hover:text-gray-700 transition-colors">↓</button>
+          <button onclick="deleteCard(this.closest('.card-editor'))" title="Smazat"
+            class="p-1 text-red-400 hover:text-red-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+          <svg class="chevron w-4 h-4 text-gray-400 transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card body -->
+      <div class="card-body p-4 space-y-3">
+
+        <!-- Photo -->
+        <label class="block cursor-pointer">
+          <p class="text-xs font-medium text-gray-600 mb-1.5">Fotka</p>
+          <div class="photo-dropzone border-2 border-dashed border-gray-200 rounded-lg p-5 text-center hover:border-blue-400 transition-colors">
+            <p class="text-gray-400 text-xs">Klikni nebo přetáhni fotku</p>
+          </div>
+          <input type="file" accept="image/*" class="photo-input hidden">
+        </label>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1.5">Název</label>
+          <input type="text" class="field-title w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Název karty">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1.5">Popis</label>
+          <textarea class="field-desc w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" rows="3"
+            placeholder="Popis aktivity…"></textarea>
+          <p class="text-xs text-gray-400 mt-1">Prvních 80 znaků se zobrazí přímo, zbytek po rozbalení.</p>
+        </div>
+
+        <!-- URL -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1.5">URL odkaz</label>
+          <input type="url" class="field-url w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+            placeholder="https://…">
+        </div>
+
+        <!-- Button label -->
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1.5">Text tlačítka</label>
+          <input type="text" class="field-btn w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value="Otevřít">
+        </div>
+
+      </div>
+    </div>
+  </template>
+
+  <style>
+    .step-badge {
+      @apply w-6 h-6 bg-gray-900 text-white rounded-full text-xs flex items-center justify-center font-bold;
+      display: inline-flex;
+    }
+    .card-editor.collapsed .card-body { display: none; }
+    .card-editor.collapsed .chevron { transform: rotate(-90deg); }
+  </style>
+
+  <script>
+    const REPO = 'chmelainv/AI-nadsenci-web';
+    const API  = 'https://api.github.com';
+
+    // State
+    let state = { eventId: null, cards: [] };
+    // cards[i] = { id, title, description, url, btnLabel, photo, _file, _previewUrl }
+
+    // ── Init ────────────────────────────────────────────────────────────
+    window.addEventListener('load', async () => {
+      const token = localStorage.getItem('gh_token');
+      if (token) {
+        document.getElementById('gh-token').value = token;
+        document.getElementById('token-status').textContent = '✓ Token načten';
+      }
+
+      // Load event list
+      try {
+        const res = await fetch('/content/events/index.json?t=' + Date.now());
+        if (res.ok) {
+          const ids = await res.json();
+          const select = document.getElementById('event-select');
+          // Load event titles
+          const events = await Promise.all(ids.map(id =>
+            fetch(`/content/events/${id}/event.json`).then(r => r.ok ? r.json() : { id, title: id }).catch(() => ({ id, title: id }))
+          ));
+          events.forEach(ev => {
+            const opt = document.createElement('option');
+            opt.value = ev.id;
+            opt.textContent = `${ev.title || ev.id} (${ev.id})`;
+            select.appendChild(opt);
+          });
+        }
+      } catch (e) { /* ignore */ }
+    });
+
+    // ── Token ───────────────────────────────────────────────────────────
+    function saveToken() {
+      const token = document.getElementById('gh-token').value.trim();
+      if (!token) return;
+      localStorage.setItem('gh_token', token);
+      document.getElementById('token-status').textContent = '✓ Token uložen';
+    }
+
+    // ── Load event ──────────────────────────────────────────────────────
+    async function loadEvent() {
+      const id = document.getElementById('event-select').value;
+      if (!id) return;
+
+      state.eventId = id;
+      state.cards = [];
+
+      document.getElementById('cards-section').classList.remove('hidden');
+      document.getElementById('publish-section').classList.remove('hidden');
+      document.getElementById('title-section').classList.remove('hidden');
+
+      // Update preview link
+      const link = document.getElementById('preview-link');
+      link.href = `/rozcestnik/?event=${id}`;
+      link.classList.remove('hidden');
+
+      // Try to load existing activities
+      try {
+        const res = await fetch(`/content/events/${id}/activities.json?t=` + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data.title) document.getElementById('page-title').value = data.title;
+          state.cards = (data.activities || []).map(a => ({ ...a, _file: null, _previewUrl: null }));
+        }
+      } catch (e) { /* first time for this event */ }
+
+      renderCards();
+      showQr();
+    }
+
+    // ── Cards rendering ─────────────────────────────────────────────────
+    function renderCards() {
+      const list = document.getElementById('cards-list');
+      const empty = document.getElementById('empty-state');
+
+      list.innerHTML = '';
+
+      if (!state.cards.length) {
+        empty.classList.remove('hidden');
+        document.getElementById('cards-count').textContent = '0 karet';
+        return;
+      }
+
+      empty.classList.add('hidden');
+      document.getElementById('cards-count').textContent = `${state.cards.length} ${state.cards.length === 1 ? 'karta' : state.cards.length < 5 ? 'karty' : 'karet'}`;
+
+      state.cards.forEach((card, idx) => {
+        const el = createCardElement(card, idx);
+        list.appendChild(el);
+      });
+    }
+
+    function createCardElement(card, idx) {
+      const tpl = document.getElementById('card-tpl');
+      const el = tpl.content.cloneNode(true).querySelector('.card-editor');
+
+      el.dataset.id = card.id;
+      el.classList.add('collapsed');
+
+      // Header label
+      el.querySelector('.card-label').textContent = card.title || 'Nová karta';
+
+      // Thumbnail
+      if (card._previewUrl || card.photo) {
+        const img = el.querySelector('.thumb-img');
+        img.src = card._previewUrl || card.photo;
+        img.classList.remove('hidden');
+      }
+
+      // Fields
+      el.querySelector('.field-title').value  = card.title || '';
+      el.querySelector('.field-desc').value   = card.description || '';
+      el.querySelector('.field-url').value    = card.url || '';
+      el.querySelector('.field-btn').value    = card.btnLabel || 'Otevřít';
+
+      // Photo dropzone
+      const dz  = el.querySelector('.photo-dropzone');
+      const inp = el.querySelector('.photo-input');
+
+      if (card._previewUrl || card.photo) {
+        dz.innerHTML = `<img src="${esc(card._previewUrl || card.photo)}"
+          class="max-h-28 mx-auto rounded object-contain mb-1">
+          <p class="text-xs text-gray-400">Klikni pro změnu</p>`;
+      }
+
+      inp.addEventListener('change', e => handlePhotoChange(e, card.id));
+
+      // Live header update on title change
+      el.querySelector('.field-title').addEventListener('input', e => {
+        el.querySelector('.card-label').textContent = e.target.value || 'Nová karta';
+        syncCardFromDom(card.id);
+      });
+      ['field-desc', 'field-url', 'field-btn'].forEach(cls => {
+        el.querySelector('.' + cls).addEventListener('input', () => syncCardFromDom(card.id));
+      });
+
+      return el;
+    }
+
+    function syncCardFromDom(cardId) {
+      const el = document.querySelector(`.card-editor[data-id="${cardId}"]`);
+      if (!el) return;
+      const card = state.cards.find(c => c.id === cardId);
+      if (!card) return;
+      card.title       = el.querySelector('.field-title').value;
+      card.description = el.querySelector('.field-desc').value;
+      card.url         = el.querySelector('.field-url').value;
+      card.btnLabel    = el.querySelector('.field-btn').value;
+    }
+
+    // ── Card actions ────────────────────────────────────────────────────
+    function addCard() {
+      const id = String(Date.now());
+      state.cards.push({ id, title: '', description: '', url: '', btnLabel: 'Otevřít', photo: null, _file: null, _previewUrl: null });
+      renderCards();
+      // Open new card
+      const el = document.querySelector(`.card-editor[data-id="${id}"]`);
+      if (el) {
+        el.classList.remove('collapsed');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function deleteCard(el) {
+      if (!confirm('Smazat kartu?')) return;
+      state.cards = state.cards.filter(c => c.id !== el.dataset.id);
+      renderCards();
+    }
+
+    function moveCard(el, dir) {
+      const idx = state.cards.findIndex(c => c.id === el.dataset.id);
+      if (idx < 0) return;
+      const newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= state.cards.length) return;
+      syncCardFromDom(el.dataset.id);
+      [state.cards[idx], state.cards[newIdx]] = [state.cards[newIdx], state.cards[idx]];
+      renderCards();
+    }
+
+    function toggleCard(header) {
+      const editor = header.closest('.card-editor');
+      editor.classList.toggle('collapsed');
+    }
+
+    function handlePhotoChange(e, cardId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('Max 10 MB'); return; }
+
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const card = state.cards.find(c => c.id === cardId);
+        if (!card) return;
+        card._file = file;
+        card._previewUrl = ev.target.result;
+
+        const el = document.querySelector(`.card-editor[data-id="${cardId}"]`);
+        if (el) {
+          el.querySelector('.photo-dropzone').innerHTML = `
+            <img src="${esc(ev.target.result)}" class="max-h-28 mx-auto rounded object-contain mb-1">
+            <p class="text-xs text-gray-400">Klikni pro změnu</p>`;
+          const img = el.querySelector('.thumb-img');
+          img.src = ev.target.result;
+          img.classList.remove('hidden');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── GitHub API ──────────────────────────────────────────────────────
+    async function getFileSha(token, path) {
+      const res = await fetch(`${API}/repos/${REPO}/contents/${path}`, {
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      return res.ok ? (await res.json()).sha : null;
+    }
+
+    async function putFile(token, path, base64Content, message, sha) {
+      const body = { message, content: base64Content };
+      if (sha) body.sha = sha;
+      const res = await fetch(`${API}/repos/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${res.status}`);
+      }
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function jsonToBase64(obj) {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
+    }
+
+    // ── Publish ─────────────────────────────────────────────────────────
+    async function publish() {
+      const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh_token');
+      if (!token) { setStatus('error', '⚠ Chybí GitHub token'); return; }
+      if (!state.eventId) { setStatus('error', '⚠ Vyber akci'); return; }
+
+      // Sync all cards from DOM
+      state.cards.forEach(c => syncCardFromDom(c.id));
+
+      const btn = document.getElementById('publish-btn');
+      btn.disabled = true;
+
+      try {
+        let uploaded = 0;
+        const total = state.cards.filter(c => c._file).length;
+
+        // Upload photos
+        for (const card of state.cards) {
+          if (!card._file) continue;
+          uploaded++;
+          setStatus('loading', `Nahrávám fotku ${uploaded}/${total}…`);
+          const ext  = card._file.name.split('.').pop().toLowerCase() || 'jpg';
+          const path = `public/images/events/${state.eventId}/activities/${card.id}.${ext}`;
+          const b64  = await fileToBase64(card._file);
+          const sha  = await getFileSha(token, path);
+          await putFile(token, path, b64, 'chore: add activity photo', sha);
+          card.photo = `/images/events/${state.eventId}/activities/${card.id}.${ext}`;
+          card._file = null;
+          card._previewUrl = null;
+        }
+
+        // Save activities.json
+        setStatus('loading', 'Ukládám obsah…');
+        const pageTitle = document.getElementById('page-title').value.trim();
+        const payload = {
+          eventId: state.eventId,
+          title: pageTitle,
+          activities: state.cards.map(({ id, title, description, url, btnLabel, photo }) =>
+            ({ id, title, description, url, btnLabel, photo })),
+        };
+        const jsonPath = `public/content/events/${state.eventId}/activities.json`;
+        const jsonSha  = await getFileSha(token, jsonPath);
+        await putFile(token, jsonPath, jsonToBase64(payload), 'chore: update activities', jsonSha);
+
+        setStatus('success', `✓ Publikováno! Build běží, za ~90 sec bude živé.`);
+        showQr();
+      } catch (e) {
+        setStatus('error', '✗ Chyba: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────
+    function showQr() {
+      if (!state.eventId) return;
+      const url = `${window.location.origin}/rozcestnik/?event=${state.eventId}`;
+      document.getElementById('qr-img').src =
+        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(url)}&size=200x200&margin=10`;
+      document.getElementById('qr-url').textContent = url;
+      document.getElementById('qr-section').classList.remove('hidden');
+    }
+
+    function setStatus(type, msg) {
+      const el = document.getElementById('status');
+      const cls = { error: 'text-red-600', success: 'text-green-700', loading: 'text-gray-500' };
+      el.className = `text-center text-sm ${cls[type]}`;
+      el.textContent = msg;
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

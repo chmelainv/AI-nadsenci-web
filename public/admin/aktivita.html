@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Aktivita</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Top bar -->
+  <header class="bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between sticky top-0 z-10">
+    <div class="flex items-center gap-3">
+      <span class="text-lg font-bold text-gray-900">Admin</span>
+      <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium hidden sm:inline">aktivita</span>
+    </div>
+    <a href="/aktivita/" target="_blank"
+      class="text-sm text-blue-700 hover:underline font-medium">
+      Zobrazit stránku →
+    </a>
+  </header>
+
+  <div class="max-w-5xl mx-auto p-5 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+
+    <!-- ===== LEFT: FORM ===== -->
+    <div class="space-y-4">
+
+      <!-- Token -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <span class="w-6 h-6 bg-gray-900 text-white rounded-full text-xs flex items-center justify-center font-bold">1</span>
+          GitHub token
+        </h2>
+        <div class="flex gap-2">
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx"
+            class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+          <button onclick="saveToken()"
+            class="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
+            Uložit
+          </button>
+        </div>
+        <p id="token-status" class="text-xs text-gray-400 mt-2"></p>
+        <p class="text-xs text-gray-300 mt-1">Token se ukládá jen lokálně v prohlížeči.</p>
+      </div>
+
+      <!-- Content -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5 space-y-4">
+        <h2 class="font-semibold text-gray-900 flex items-center gap-2">
+          <span class="w-6 h-6 bg-gray-900 text-white rounded-full text-xs flex items-center justify-center font-bold">2</span>
+          Obsah
+        </h2>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Název aktivity</label>
+          <input type="text" id="title" placeholder="Např. Vyzkoušej AI asistenta"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Popis</label>
+          <textarea id="description" rows="3" placeholder="Krátký popis co tě čeká..."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">URL odkaz (AI asistent)</label>
+          <input type="url" id="url" placeholder="https://..."
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Text tlačítka</label>
+          <input type="text" id="btn-label" value="Otevřít AI asistenta"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+      </div>
+
+      <!-- Photo -->
+      <div class="bg-white rounded-xl border border-gray-200 p-5">
+        <h2 class="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <span class="w-6 h-6 bg-gray-900 text-white rounded-full text-xs flex items-center justify-center font-bold">3</span>
+          Fotka
+        </h2>
+        <label class="block cursor-pointer">
+          <div id="drop-zone"
+            class="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors">
+            <p class="text-gray-500 text-sm">Klikni nebo přetáhni fotku sem</p>
+            <p class="text-gray-400 text-xs mt-1">JPG, PNG, WEBP — max 10 MB</p>
+          </div>
+          <input type="file" id="photo" accept="image/*" class="hidden">
+        </label>
+      </div>
+
+      <!-- Publish button -->
+      <button onclick="publish()" id="publish-btn"
+        class="w-full py-3 bg-blue-700 text-white rounded-xl font-bold text-base hover:bg-blue-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+        Publikovat
+      </button>
+
+      <div id="status" class="text-center text-sm min-h-5"></div>
+
+      <!-- QR code -->
+      <div id="qr-section" class="hidden bg-white rounded-xl border border-gray-200 p-5 text-center">
+        <p class="text-sm font-medium text-gray-700 mb-3">QR kód pro účastníky</p>
+        <img id="qr-img" src="" alt="QR kód" class="mx-auto rounded-lg">
+        <p id="qr-url" class="text-xs text-gray-400 mt-2 break-all"></p>
+      </div>
+    </div>
+
+    <!-- ===== RIGHT: PREVIEW ===== -->
+    <div class="lg:sticky lg:top-20 lg:self-start">
+      <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2 px-1">Náhled stránky</p>
+      <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+        <!-- Browser chrome -->
+        <div class="border-b border-gray-100 px-4 py-2.5 flex items-center gap-2 bg-gray-50">
+          <div class="w-2.5 h-2.5 rounded-full bg-red-300"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-yellow-300"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-green-300"></div>
+          <div class="flex-1 ml-2 bg-white border border-gray-200 rounded px-2 py-0.5 text-xs text-gray-400 font-mono">
+            /aktivita/
+          </div>
+        </div>
+        <!-- Content -->
+        <div class="p-5 min-h-48" id="preview">
+          <p class="text-gray-300 text-sm text-center py-10">Vyplň formulář…</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const REPO = 'chmelainv/AI-nadsenci-web';
+    const API_BASE = 'https://api.github.com';
+
+    let selectedFile = null;
+    let previewDataUrl = null;
+    let currentPhoto = null;
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    window.addEventListener('load', async () => {
+      const savedToken = localStorage.getItem('gh_token');
+      if (savedToken) {
+        document.getElementById('gh-token').value = savedToken;
+        document.getElementById('token-status').textContent = '✓ Token načten';
+      }
+
+      // Load current activity
+      try {
+        const res = await fetch('/content/activity.json?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          currentPhoto = data.photo || null;
+          if (data.title) document.getElementById('title').value = data.title;
+          if (data.description) document.getElementById('description').value = data.description;
+          if (data.url) document.getElementById('url').value = data.url;
+          if (data.btnLabel) document.getElementById('btn-label').value = data.btnLabel;
+          updatePreview();
+          showQr();
+        }
+      } catch (e) { /* first time */ }
+
+      // Live preview
+      ['title', 'description', 'url', 'btn-label'].forEach(id =>
+        document.getElementById(id).addEventListener('input', updatePreview)
+      );
+
+      // Photo picker
+      document.getElementById('photo').addEventListener('change', handlePhoto);
+    });
+
+    // ── Token ─────────────────────────────────────────────────────────────
+    function saveToken() {
+      const token = document.getElementById('gh-token').value.trim();
+      if (!token) return;
+      localStorage.setItem('gh_token', token);
+      document.getElementById('token-status').textContent = '✓ Token uložen';
+    }
+
+    // ── Photo ─────────────────────────────────────────────────────────────
+    function handlePhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Fotka je příliš velká (max 10 MB).');
+        return;
+      }
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        previewDataUrl = ev.target.result;
+        document.getElementById('drop-zone').innerHTML = `
+          <img src="${previewDataUrl}" class="max-h-36 mx-auto rounded-lg object-contain mb-2">
+          <p class="text-xs text-gray-400">${file.name} (${(file.size / 1024).toFixed(0)} kB)</p>
+        `;
+        updatePreview();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Preview ───────────────────────────────────────────────────────────
+    function updatePreview() {
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const url = document.getElementById('url').value;
+      const btnLabel = document.getElementById('btn-label').value;
+      const photoSrc = previewDataUrl || currentPhoto;
+
+      let html = '';
+
+      if (photoSrc) {
+        html += `<img src="${esc(photoSrc)}" class="w-full rounded-xl object-cover mb-4" style="max-height:220px;">`;
+      }
+      if (title) {
+        html += `<h2 class="text-xl font-black text-gray-900 mb-2 leading-tight">${esc(title)}</h2>`;
+      }
+      if (description) {
+        html += `<p class="text-gray-600 text-sm leading-relaxed mb-5">${esc(description)}</p>`;
+      }
+      if (url) {
+        html += `<div class="flex items-center justify-center gap-2 w-full py-3 px-5 bg-blue-700 text-white rounded-xl font-bold text-sm">
+          ${esc(btnLabel || 'Otevřít')} ↗
+        </div>`;
+      }
+      if (!photoSrc && !title && !description && !url) {
+        html = '<p class="text-gray-300 text-sm text-center py-10">Vyplň formulář…</p>';
+      }
+
+      document.getElementById('preview').innerHTML = html;
+    }
+
+    // ── QR ────────────────────────────────────────────────────────────────
+    function showQr() {
+      const pageUrl = window.location.origin + '/aktivita/';
+      const qrSection = document.getElementById('qr-section');
+      document.getElementById('qr-img').src =
+        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(pageUrl)}&size=200x200&margin=10`;
+      document.getElementById('qr-url').textContent = pageUrl;
+      qrSection.classList.remove('hidden');
+    }
+
+    // ── GitHub API helpers ────────────────────────────────────────────────
+    async function getFileSha(token, path) {
+      const res = await fetch(`${API_BASE}/repos/${REPO}/contents/${path}`, {
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      if (res.ok) return (await res.json()).sha;
+      return null;
+    }
+
+    async function putFile(token, path, base64Content, message, sha) {
+      const body = { message, content: base64Content };
+      if (sha) body.sha = sha;
+      const res = await fetch(`${API_BASE}/repos/${REPO}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${res.status}`);
+      }
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function jsonToBase64(obj) {
+      return btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
+    }
+
+    // ── Publish ───────────────────────────────────────────────────────────
+    async function publish() {
+      const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh_token');
+      if (!token) { setStatus('error', '⚠ Chybí GitHub token'); return; }
+
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const url = document.getElementById('url').value.trim();
+      const btnLabel = document.getElementById('btn-label').value.trim();
+
+      if (!title || !description || !url) {
+        setStatus('error', '⚠ Vyplň název, popis a URL');
+        return;
+      }
+
+      const btn = document.getElementById('publish-btn');
+      btn.disabled = true;
+
+      try {
+        let photoPath = currentPhoto;
+
+        // 1. Upload photo if selected
+        if (selectedFile) {
+          setStatus('loading', 'Nahrávám fotku…');
+          const ext = selectedFile.name.split('.').pop().toLowerCase() || 'jpg';
+          const repoPhotoPath = `public/images/activity/photo.${ext}`;
+          const base64 = await toBase64(selectedFile);
+          const sha = await getFileSha(token, repoPhotoPath);
+          await putFile(token, repoPhotoPath, base64, 'chore: update activity photo', sha);
+          photoPath = `/images/activity/photo.${ext}`;
+          currentPhoto = photoPath;
+        }
+
+        // 2. Update activity.json
+        setStatus('loading', 'Ukládám obsah…');
+        const newContent = { title, description, url, btnLabel, photo: photoPath };
+        const jsonSha = await getFileSha(token, 'public/content/activity.json');
+        await putFile(token, 'public/content/activity.json', jsonToBase64(newContent), 'chore: update activity content', jsonSha);
+
+        setStatus('success', '✓ Publikováno! Build běží, za ~90 sec bude živé.');
+        showQr();
+      } catch (e) {
+        setStatus('error', '✗ Chyba: ' + e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function setStatus(type, msg) {
+      const el = document.getElementById('status');
+      const cls = { error: 'text-red-600', success: 'text-green-700', loading: 'text-gray-500' };
+      el.className = `text-center text-sm ${cls[type]}`;
+      el.textContent = msg;
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
