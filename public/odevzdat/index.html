@@ -210,9 +210,11 @@
       setSendingLabel('Odesílám…');
 
       try {
+        const eventId = new URLSearchParams(location.search).get('event') || '';
         const fd = new FormData();
         fd.append('team',        team);
         fd.append('description', description);
+        fd.append('event',       eventId);
         fd.append('photo',       resizedBlob, `foto-${Date.now()}.jpg`);
 
         const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });

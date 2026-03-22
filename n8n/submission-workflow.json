@@ -1,0 +1,205 @@
+{
+  "name": "Odevzdání aktivity → GitHub PR",
+  "nodes": [
+    {
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300],
+      "parameters": {
+        "path": "submission",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      }
+    },
+    {
+      "id": "node-prepare",
+      "name": "Připrav data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [420, 300],
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst now = Date.now();\nconst eventId = String(item.json.event || '').trim() || 'UNKNOWN';\n\nreturn [{\n  json: {\n    team:          String(item.json.team || '').trim(),\n    description:   String(item.json.description || '').trim(),\n    eventId,\n    branchName:    `submission/${eventId}-${now}`,\n    photoRepoPath: `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath: `/images/submissions/${eventId}/${now}.jpg`,\n    activitiesPath: `public/content/events/${eventId}/activities.json`,\n    activityId:    String(now),\n    photoBase64:   item.binary?.photo?.data ?? ''\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-get-head",
+      "name": "Načti HEAD main",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/git/refs/heads/main",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-create-branch",
+      "name": "Vytvoř větev",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [860, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/git/refs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ ref: 'refs/heads/' + $('Připrav data').item.json.branchName, sha: $json.object.sha }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-get-activities",
+      "name": "Načti activities.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $('Připrav data').item.json.activitiesPath }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-merge-activities",
+      "name": "Sestav activities.json",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1300, 300],
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:          prep.activityId,\n  title:       prep.team,\n  description: prep.description,\n  url:         '',\n  btnLabel:    'Zobrazit',\n  photo:       prep.photoPublicPath\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64\n  }\n}];"
+      }
+    },
+    {
+      "id": "node-put-photo",
+      "name": "Nahraj fotku",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1520, 200],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.photoRepoPath }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ message: 'submission: foto ' + $json.team, content: $json.photoBase64, branch: $json.branchName }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-put-json",
+      "name": "Nahraj activities.json",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1520, 420],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.activitiesPath }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ message: 'submission: data ' + $json.team, content: $json.newActivitiesBase64, branch: $json.branchName }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-create-pr",
+      "name": "Vytvoř PR",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1740, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/pulls",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ title: '🎯 Aktivita: ' + $('Sestav activities.json').item.json.team, body: '**Tým:** ' + $('Sestav activities.json').item.json.team + '\\n\\n**Popis:**\\n' + $('Sestav activities.json').item.json.description + '\\n\\n**Fotka:** ' + $('Sestav activities.json').item.json.photoPublicPath, head: $('Sestav activities.json').item.json.branchName, base: 'main' }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "GitHub Token" }
+      }
+    },
+    {
+      "id": "node-respond",
+      "name": "Odpověz 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1960, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true }"
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Připrav data", "type": "main", "index": 0 }]]
+    },
+    "Připrav data": {
+      "main": [[{ "node": "Načti HEAD main", "type": "main", "index": 0 }]]
+    },
+    "Načti HEAD main": {
+      "main": [[{ "node": "Vytvoř větev", "type": "main", "index": 0 }]]
+    },
+    "Vytvoř větev": {
+      "main": [[{ "node": "Načti activities.json", "type": "main", "index": 0 }]]
+    },
+    "Načti activities.json": {
+      "main": [[{ "node": "Sestav activities.json", "type": "main", "index": 0 }]]
+    },
+    "Sestav activities.json": {
+      "main": [
+        [{ "node": "Nahraj fotku", "type": "main", "index": 0 }],
+        [{ "node": "Nahraj activities.json", "type": "main", "index": 0 }]
+      ]
+    },
+    "Nahraj fotku": {
+      "main": [[{ "node": "Vytvoř PR", "type": "main", "index": 0 }]]
+    },
+    "Nahraj activities.json": {
+      "main": [[{ "node": "Vytvoř PR", "type": "main", "index": 0 }]]
+    },
+    "Vytvoř PR": {
+      "main": [[{ "node": "Odpověz 200", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
