@@ -1351,13 +1351,153 @@ Value: fajne-prompty.github.io
 
 ---
 
-## 14. Changelog
+## 14. Event Aktivity Systém
+
+Systém pro sběr a zobrazení aktivit od účastníků během akcí. Umožňuje týmům odeslat výsledek své práce (foto + popis) přímo z mobilu. Organizátor PR schválí a výsledky se automaticky zobrazí na webu.
+
+### 14.1 Přehled architektury
+
+```
+Účastník vyplní formulář (/odevzdat/)
+    ↓
+n8n webhook přijme multipart/form-data
+    ↓
+n8n vytvoří GitHub branch + commitne foto + activities.json
+    ↓
+n8n vytvoří Pull Request
+    ↓
+Organizátor PR schválí v GitHubu
+    ↓
+GitHub Actions spustí build (~90 s)
+    ↓
+Výsledky se zobrazí na /rozcestnik/?event=ID
+```
+
+### 14.2 Stránky
+
+| Stránka | URL | Popis |
+|---------|-----|-------|
+| Formulář odevzdání | `/odevzdat/?event=ID&team=NázevTýmu` | Účastníci odevzdávají aktivitu |
+| Přehled aktivit | `/rozcestnik/?event=ID` | 2-sloupcová galerie karet týmů |
+| Admin – jedna aktivita | `/admin/aktivita.html` | Správa obsahu `/aktivita/` stránky |
+| Admin – rozcestník | `/admin/rozcestnik.html` | Správa per-event aktivit v rozcestníku |
+
+### 14.3 Formulář odevzdání (`/odevzdat/`)
+
+**Soubor:** `public/odevzdat/index.html`
+
+**Funkce:**
+- Předvyplnění týmu z URL parametru `?team=NázevTýmu`
+- Event ID z URL parametru `?event=ID`
+- Canvas resize fotky na max 1200px, JPEG kvalita 0.82 (před odesláním)
+- Drag & drop nebo click-to-upload
+- Odeslání přes `multipart/form-data` POST na n8n webhook
+- Stavy: formulář / odesílám (spinner) / úspěch / chyba
+
+**Konfigurace:**
+```javascript
+const WEBHOOK_URL = 'https://auto.maronext.cz/webhook/submission';
+const PHOTO_MAX_PX  = 1200;
+const PHOTO_QUALITY = 0.82;
+```
+
+**Každý tým dostane unikátní odkaz:**
+```
+https://fajneprompty.cz/odevzdat/?event=20260323&team=N%C3%A1zevT%C3%BDmu
+```
+
+### 14.4 n8n Workflow
+
+**Soubor:** `n8n/submission-workflow.json` (importovatelný do n8n)
+
+**Nodes (sekvenční řetězec):**
+
+| # | Node | Typ | Popis |
+|---|------|-----|-------|
+| 1 | Webhook | Webhook | Příjme POST na `/webhook/submission` |
+| 2 | Připrav data | Code | Extrahuje pole z `body.*`, načte binární foto přes `getBinaryDataBuffer`, sestaví cesty |
+| 3 | Načti HEAD main | HTTP GET | Získá SHA aktuálního commitu main větve |
+| 4 | Vytvoř větev | HTTP POST | Vytvoří `submission/{eventId}-{timestamp}` větev |
+| 5 | Načti activities.json | HTTP GET | Načte existující soubor (continueOnFail=true — soubor nemusí existovat) |
+| 6 | Sestav activities.json | Code | Dekóduje existující, přidá novou aktivitu, zakóduje zpět do base64; extrahuje `sha` pro aktualizaci |
+| 7 | Nahraj fotku | HTTP PUT | GitHub Contents API — uloží foto do `public/images/submissions/{eventId}/{ts}.jpg` |
+| 8 | Připrav JSON upload | Code | Sestaví `uploadUrl` a `uploadBody` jako plain string (obchází omezení n8n expression parseru) |
+| 9 | Nahraj activities.json | HTTP PUT | `url: {{ $json.uploadUrl }}`, `body: {{ $json.uploadBody }}` |
+| 10 | Vytvoř PR | HTTP POST | Vytvoří PR s názvem `🎯 Aktivita: {team}` |
+| 11 | Odpověz 200 | Respond | Vrátí `{"ok": true}` formuláři |
+
+**Klíčové technické detaily:**
+
+- **multipart/form-data**: textová pole jsou pod `item.json.body.*`, ne `item.json.*`
+- **Binary storage**: n8n v2 s `filesystem-v2` neukládá base64 inline — nutno použít `this.helpers.getBinaryDataBuffer(0, 'photo')`
+- **GitHub SHA**: při aktualizaci existujícího souboru musí PUT obsahovat `sha` — jinak GitHub vrátí 422
+- **Sekvenční chain**: uzly musí být za sebou (ne paralelně), jinak n8n spustí PR dřív než se nahraje JSON
+- **Header Auth credential**: Name pole = `Authorization`, Value = `token ghp_xxx`
+
+**Datová struktura activities.json:**
+```json
+{
+  "eventId": "20260323",
+  "title": "",
+  "activities": [
+    {
+      "id": "1742600000000",
+      "title": "Název týmu",
+      "description": "Popis aktivity...",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1742600000000.jpg"
+    }
+  ]
+}
+```
+
+**Umístění:** `public/content/events/{eventId}/activities.json`
+
+### 14.5 Přehled aktivit (`/rozcestnik/`)
+
+**Soubor:** `public/rozcestnik/index.html`
+
+**Funkce:**
+- Načítá `?event=ID` z URL, stáhne `/content/events/{ID}/activities.json`
+- 2-sloupcová grid galerie karet
+- Každá karta: foto (180px výška), název týmu, popis (80 znaků + Zobrazit více/méně), volitelné tlačítko s URL
+- Odkaz na detail akce (`/akce/detail.html?id=ID`) a zpět na web (`/`)
+- Cache bust: `?t=Date.now()` při fetch
+
+### 14.6 Admin stránky
+
+**Admin – jedna aktivita** (`/admin/aktivita.html`):
+- Spravuje obsah stránky `/aktivita/` (jeden AI asistent pro akci)
+- Data v `public/content/activity.json`
+- Atomický commit přes GitHub Trees API (1 commit = 1 build)
+- GitHub token uložen v `localStorage`
+- Live preview
+
+**Admin – rozcestník** (`/admin/rozcestnik.html`):
+- Spravuje per-event aktivity v rozcestníku
+- Vybírá event z `public/content/events/index.json` (`{ "events": ["20260323", ...] }`)
+- Přidává karty do `public/content/events/{eventId}/activities.json`
+- Atomický commit přes GitHub Trees API
+
+### 14.7 Workflow pro organizátora během akce
+
+1. Vytvoř QR kódy pro každý tým (URL s `?event=ID&team=Název`)
+2. Týmy vyplní formulář z mobilu během akce
+3. V GitHubu se objeví PR za každý tým
+4. Schval PR (nebo všechny najednou) — build proběhne automaticky (~90 s)
+5. Výsledky jsou živé na `/rozcestnik/?event=ID`
+
+---
+
+## 15. Changelog
 
 | Verze | Datum | Změny |
 |-------|-------|-------|
 | 1.0 | Leden 2026 | Initial PRD |
+| 1.1 | Březen 2026 | Přidán Event Aktivity Systém: /aktivita/, /rozcestnik/, /odevzdat/, admin stránky, n8n workflow |
 
 ---
 
 *Dokument vytvořen pro vývoj webu Fajne Prompty*
-*Poslední aktualizace: Leden 2026*
+*Poslední aktualizace: Březen 2026*

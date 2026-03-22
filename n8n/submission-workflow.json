@@ -23,7 +23,7 @@
       "typeVersion": 1,
       "position": [420, 300],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst now = Date.now();\nconst body = item.json.body || item.json;\nconst eventId = String(body.event || '').trim() || 'UNKNOWN';\n\nlet photoBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'photo');\n  photoBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'photo');\n    photoBase64 = buffer.toString('base64');\n  } catch(e2) {\n    photoBase64 = (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\nreturn [{\n  json: {\n    team:            String(body.team || '').trim(),\n    description:     String(body.description || '').trim(),\n    eventId,\n    branchName:      `submission/${eventId}-${now}`,\n    photoRepoPath:   `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath: `/images/submissions/${eventId}/${now}.jpg`,\n    activitiesPath:  `public/content/events/${eventId}/activities.json`,\n    activityId:      String(now),\n    photoBase64\n  }\n}];"
+        "jsCode": "const item = items[0];\nconst now = Date.now();\n// multipart/form-data: textová pole jsou pod item.json.body\nconst body = item.json.body || item.json;\nconst eventId = String(body.event || '').trim() || 'UNKNOWN';\n\n// Načti binární data fotky (filesystem-v2 storage vyžaduje getBinaryDataBuffer)\nlet photoBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'photo');\n  photoBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'photo');\n    photoBase64 = buffer.toString('base64');\n  } catch(e2) {\n    photoBase64 = (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\nreturn [{\n  json: {\n    team:            String(body.team || '').trim(),\n    description:     String(body.description || '').trim(),\n    eventId,\n    branchName:      `submission/${eventId}-${now}`,\n    photoRepoPath:   `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath: `/images/submissions/${eventId}/${now}.jpg`,\n    activitiesPath:  `public/content/events/${eventId}/activities.json`,\n    activityId:      String(now),\n    photoBase64\n  }\n}];"
       }
     },
     {
@@ -89,7 +89,7 @@
       "typeVersion": 1,
       "position": [1300, 300],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\n\n// SHA existujícího souboru — nutné pro GitHub PUT update\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:          prep.activityId,\n  title:       prep.team,\n  description: prep.description,\n  url:         '',\n  btnLabel:    'Zobrazit',\n  photo:       prep.photoPublicPath\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
+        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\n\n// SHA existujícího souboru — nutné pro GitHub PUT update (bez SHA vrátí 422)\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:          prep.activityId,\n  title:       prep.team,\n  description: prep.description,\n  url:         '',\n  btnLabel:    'Zobrazit',\n  photo:       prep.photoPublicPath\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
       }
     },
     {
@@ -97,7 +97,7 @@
       "name": "Nahraj fotku",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1520, 200],
+      "position": [1520, 300],
       "parameters": {
         "method": "PUT",
         "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.photoRepoPath }}",
@@ -114,20 +114,30 @@
       }
     },
     {
+      "id": "node-prepare-json-upload",
+      "name": "Připrav JSON upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1740, 300],
+      "parameters": {
+        "jsCode": "// Připraví URL a body pro nahrání activities.json jako plain string\n// (komplexní výrazy v HTTP Request URL/body polích v n8n mohou selhat s 'invalid syntax')\nconst d = $('Sestav activities.json').item.json;\n\nconst bodyObj = {\n  message: 'submission: data ' + d.team,\n  content: d.newActivitiesBase64,\n  branch:  d.branchName\n};\n// SHA je povinné pokud soubor již existuje, jinak GitHub vrátí 422\nif (d.activitiesSha) bodyObj.sha = d.activitiesSha;\n\nreturn [{\n  json: {\n    uploadUrl:  'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + d.activitiesPath,\n    uploadBody: JSON.stringify(bodyObj),\n    // metadata pro Vytvoř PR\n    team:            d.team,\n    description:     d.description,\n    photoPublicPath: d.photoPublicPath,\n    branchName:      d.branchName\n  }\n}];"
+      }
+    },
+    {
       "id": "node-put-json",
       "name": "Nahraj activities.json",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1520, 420],
+      "position": [1960, 300],
       "parameters": {
         "method": "PUT",
-        "url": "={{ 'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + $('Sestav activities.json').item.json.activitiesPath }}",
+        "url": "={{ $json.uploadUrl }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "headerAuth",
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify(Object.assign({ message: 'submission: data ' + $('Sestav activities.json').item.json.team, content: $('Sestav activities.json').item.json.newActivitiesBase64, branch: $('Sestav activities.json').item.json.branchName }, $('Sestav activities.json').item.json.activitiesSha ? { sha: $('Sestav activities.json').item.json.activitiesSha } : {})) }}",
+        "body": "={{ $json.uploadBody }}",
         "options": {}
       },
       "credentials": {
@@ -139,7 +149,7 @@
       "name": "Vytvoř PR",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1740, 300],
+      "position": [2180, 300],
       "parameters": {
         "method": "POST",
         "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/pulls",
@@ -148,7 +158,7 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ title: '🎯 Aktivita: ' + $('Sestav activities.json').item.json.team, body: '**Tým:** ' + $('Sestav activities.json').item.json.team + '\\n\\n**Popis:**\\n' + $('Sestav activities.json').item.json.description + '\\n\\n**Fotka:** ' + $('Sestav activities.json').item.json.photoPublicPath, head: $('Sestav activities.json').item.json.branchName, base: 'main' }) }}",
+        "body": "={{ JSON.stringify({ title: '🎯 Aktivita: ' + $('Připrav JSON upload').item.json.team, body: '**Tým:** ' + $('Připrav JSON upload').item.json.team + '\\n\\n**Popis:**\\n' + $('Připrav JSON upload').item.json.description + '\\n\\n**Fotka:** ' + $('Připrav JSON upload').item.json.photoPublicPath, head: $('Připrav JSON upload').item.json.branchName, base: 'main' }) }}",
         "options": {}
       },
       "credentials": {
@@ -160,7 +170,7 @@
       "name": "Odpověz 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1960, 300],
+      "position": [2400, 300],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={ \"ok\": true }"
@@ -187,6 +197,9 @@
       "main": [[{ "node": "Nahraj fotku", "type": "main", "index": 0 }]]
     },
     "Nahraj fotku": {
+      "main": [[{ "node": "Připrav JSON upload", "type": "main", "index": 0 }]]
+    },
+    "Připrav JSON upload": {
       "main": [[{ "node": "Nahraj activities.json", "type": "main", "index": 0 }]]
     },
     "Nahraj activities.json": {

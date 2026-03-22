@@ -23,12 +23,27 @@ AI-nadsenci-web/
 │   │   ├── texts.json       # Globální texty, navigace, footer
 │   │   ├── organizers.json  # Organizátoři
 │   │   ├── partners.json    # Partneři (loga dynamicky v hero i sekci)
+│   │   ├── activity.json    # Data pro /aktivita/ stránku (admin spravuje)
 │   │   └── events/          # Akce (každá ve vlastní složce)
 │   │       ├── index.json   # Seznam ID akcí
 │   │       └── {id}/        # Složka akce
-│   │           ├── event.json  # Data akce
-│   │           └── media/      # Cover, galerie, video
-│   └── images/              # Obrázky (partneři, tým, eventy)
+│   │           ├── event.json        # Data akce
+│   │           ├── activities.json   # Aktivity týmů (generuje n8n)
+│   │           └── media/            # Cover, galerie, video
+│   ├── images/              # Obrázky (partneři, tým, eventy)
+│   │   └── submissions/     # Fotky odevzdané týmy (generuje n8n)
+│   │       └── {eventId}/
+│   ├── aktivita/            # Stránka s AI asistentovou aktivitou
+│   │   └── index.html
+│   ├── rozcestnik/          # Přehled aktivit týmů po akci
+│   │   └── index.html
+│   ├── odevzdat/            # Formulář pro odevzdání aktivity týmem
+│   │   └── index.html
+│   └── admin/               # Admin stránky (přímý commit do GitHubu)
+│       ├── aktivita.html    # Správa /aktivita/ stránky
+│       └── rozcestnik.html  # Správa per-event aktivit
+├── n8n/
+│   └── submission-workflow.json  # Importovatelný n8n workflow
 ├── src/
 │   ├── style.css            # Tailwind entry point
 │   ├── main.js              # Homepage logika + subscribe modal
@@ -82,9 +97,28 @@ Veškerý obsah je v JSON souborech ve složce `public/content/`.
 - **Homepage** (`/`) - zobrazuje max 2 nejbližší akce, video recap, subscribe modal
 - **Výpis akcí** (`/akce/`) - všechny akce (nadcházející + proběhlé)
 - **Detail akce** (`/akce/detail.html?id={id}`) - plný detail s galerií a lightboxem
+- **Aktivita** (`/aktivita/`) - stránka s AI asistentovou aktivitou pro akci (foto, popis, CTA tlačítko)
+- **Rozcestník** (`/rozcestnik/?event={id}`) - 2-sloupcová galerie aktivit odevzdaných týmy
+- **Odevzdání** (`/odevzdat/?event={id}&team={name}`) - formulář pro týmy, odesílá na n8n webhook
+
+### Admin stránky
+Vyžadují GitHub token uložený v `localStorage`. Token musí mít právo `repo`.
+
+- **`/admin/aktivita.html`** - správa obsahu `/aktivita/`, atomický commit přes GitHub Trees API
+- **`/admin/rozcestnik.html`** - přidávání aktivit do per-event rozcestníku, stejný mechanismus
+
+### n8n Workflow (sběr aktivit od účastníků)
+Soubor `n8n/submission-workflow.json` — importuj do n8n instance.
+
+Flow: `Webhook → Připrav data → Načti HEAD → Vytvoř větev → Načti activities.json → Sestav activities.json → Nahraj fotku → Připrav JSON upload → Nahraj activities.json → Vytvoř PR → Odpověz 200`
+
+**Požadavky:**
+- n8n s `filesystem-v2` binary storage
+- Credential `GitHub Token` (Header Auth, Name=`Authorization`, Value=`token ghp_xxx`)
+- Webhook URL nastavit v `/odevzdat/index.html` jako `WEBHOOK_URL`
 
 ## Design
 Font Inter, vlastní barevná paleta v `tailwind.config.js`.
 
 ## Deployment
-Web se automaticky deployuje na GitHub Pages přes GitHub Actions po pushnutí do `main` větve.
+Web se automaticky deployuje na GitHub Pages přes GitHub Actions po pushnutí do `main` větve. Admin stránky commitují přímo přes GitHub API (bez lokálního buildu). n8n workflow vytváří PR — organizátor ho schválí v GitHubu a build proběhne automaticky.

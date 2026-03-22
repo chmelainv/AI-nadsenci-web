@@ -10,6 +10,7 @@
 7. [Správa partnerů](#správa-partnerů)
 8. [Kontakt a footer](#kontakt-a-footer)
 9. [Publikování změn (deploy)](#publikování-změn-deploy)
+10. [Event aktivity — sběr výsledků od týmů](#event-aktivity--sběr-výsledků-od-týmů)
 
 ---
 
@@ -403,3 +404,96 @@ Web se otevře na adrese `http://localhost:5173`.
 | Obrázky partnerů | `public/images/partners/` |
 | Fotky týmu | `public/images/team/` |
 | Obrázky / galerie akce | `public/content/events/{ID}/media/` |
+| Aktivitu pro akci (AI asistent) | Admin: `/admin/aktivita.html` |
+| Aktivity týmů v rozcestníku | Admin: `/admin/rozcestnik.html` nebo přes n8n (automaticky) |
+
+---
+
+## Event aktivity — sběr výsledků od týmů
+
+Systém pro sběr výsledků týmů přímo z mobilu během akce. Každý tým dostane QR kód s odkazem na formulář, vyplní ho, a výsledky se po schválení zobrazí na webu.
+
+### Jak to funguje
+
+```
+Tým naskenuje QR → vyplní formulář → n8n vytvoří PR → ty schválíš → web se aktualizuje (~90 s)
+```
+
+### Krok 1 — Připrav QR kódy pro týmy
+
+Každý tým dostane vlastní odkaz ve formátu:
+
+```
+https://fajneprompty.cz/odevzdat/?event=20260323&team=NázevTýmu
+```
+
+- `event` = ID akce (datum ve formátu RRRRMMDD)
+- `team` = název týmu (předvyplní se ve formuláři)
+
+QR kód lze vygenerovat na [qr.io](https://qr.io) nebo podobné službě. Připrav jeden QR pro každý tým nebo jeden společný (bez `team=`).
+
+### Krok 2 — Týmy odevzdají aktivitu
+
+Tým otevře odkaz, vyplní:
+- **Název týmu** (předvyplněn z URL)
+- **Popis aktivity** (max 1000 znaků)
+- **Fotka** (resize na max 1200px proběhne automaticky v prohlížeči)
+
+Po odeslání se zobrazí potvrzení. Na pozadí n8n automaticky:
+1. Vytvoří novou větev v GitHubu
+2. Nahraje fotku
+3. Přidá aktivitu do `activities.json` dané akce
+4. Vytvoří Pull Request
+
+### Krok 3 — Schval Pull Request
+
+Otevři [GitHub → Pull requests](https://github.com/chmelainv/AI-nadsenci-web/pulls) a schval PR každého týmu (nebo všechny najednou tlačítkem **Merge pull request**).
+
+> Každý PR = jedna aktivita od jednoho týmu. Můžeš schvalovat průběžně nebo najednou na konci.
+
+### Krok 4 — Výsledky jsou živé
+
+Po schválení PR proběhne automatický build (~90 sekund). Výsledky se zobrazí na:
+
+```
+https://fajneprompty.cz/rozcestnik/?event=20260323
+```
+
+### Stránka s aktivitou (AI asistent)
+
+Pokud chceš pro akci nastavit stránku s konkrétním AI asistentem (foto + popis + tlačítko), použij admin:
+
+1. Otevři **`/admin/aktivita.html`**
+2. Vlož GitHub token (uložen lokálně v prohlížeči)
+3. Vyplň název, popis, URL asistenta, nahraj foto
+4. Klikni **Publikovat** — změna se commitne přímo do main větve a web se aktualizuje za ~90 s
+
+Stránka pro účastníky je pak dostupná na `/aktivita/`.
+
+### Manuální úprava aktivit (pokud potřeba)
+
+Aktivity jsou uloženy v JSON souboru pro každou akci:
+
+```
+public/content/events/{eventId}/activities.json
+```
+
+Struktura:
+```json
+{
+  "eventId": "20260323",
+  "title": "",
+  "activities": [
+    {
+      "id": "1742600000000",
+      "title": "Název týmu",
+      "description": "Popis aktivity...",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1742600000000.jpg"
+    }
+  ]
+}
+```
+
+Soubor lze editovat přímo přes admin `/admin/rozcestnik.html` nebo ručně v GitHubu.
