@@ -121,13 +121,13 @@
       "position": [1520, 420],
       "parameters": {
         "method": "PUT",
-        "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.activitiesPath }}",
+        "url": "={{ 'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + $('Sestav activities.json').item.json.activitiesPath }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "headerAuth",
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify(Object.assign({ message: 'submission: data ' + $json.team, content: $json.newActivitiesBase64, branch: $json.branchName }, $json.activitiesSha ? { sha: $json.activitiesSha } : {})) }}",
+        "body": "={{ JSON.stringify(Object.assign({ message: 'submission: data ' + $('Sestav activities.json').item.json.team, content: $('Sestav activities.json').item.json.newActivitiesBase64, branch: $('Sestav activities.json').item.json.branchName }, $('Sestav activities.json').item.json.activitiesSha ? { sha: $('Sestav activities.json').item.json.activitiesSha } : {})) }}",
         "options": {}
       },
       "credentials": {
