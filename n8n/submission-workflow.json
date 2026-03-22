@@ -89,7 +89,7 @@
       "typeVersion": 1,
       "position": [1300, 300],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:          prep.activityId,\n  title:       prep.team,\n  description: prep.description,\n  url:         '',\n  btnLabel:    'Zobrazit',\n  photo:       prep.photoPublicPath\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64\n  }\n}];"
+        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\n\n// SHA existujícího souboru — nutné pro GitHub PUT update\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:          prep.activityId,\n  title:       prep.team,\n  description: prep.description,\n  url:         '',\n  btnLabel:    'Zobrazit',\n  photo:       prep.photoPublicPath\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
       }
     },
     {
@@ -127,7 +127,7 @@
         "sendBody": true,
         "contentType": "raw",
         "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ message: 'submission: data ' + $json.team, content: $json.newActivitiesBase64, branch: $json.branchName }) }}",
+        "body": "={{ JSON.stringify(Object.assign({ message: 'submission: data ' + $json.team, content: $json.newActivitiesBase64, branch: $json.branchName }, $json.activitiesSha ? { sha: $json.activitiesSha } : {})) }}",
         "options": {}
       },
       "credentials": {
@@ -184,13 +184,10 @@
       "main": [[{ "node": "Sestav activities.json", "type": "main", "index": 0 }]]
     },
     "Sestav activities.json": {
-      "main": [
-        [{ "node": "Nahraj fotku", "type": "main", "index": 0 }],
-        [{ "node": "Nahraj activities.json", "type": "main", "index": 0 }]
-      ]
+      "main": [[{ "node": "Nahraj fotku", "type": "main", "index": 0 }]]
     },
     "Nahraj fotku": {
-      "main": [[{ "node": "Vytvoř PR", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Nahraj activities.json", "type": "main", "index": 0 }]]
     },
     "Nahraj activities.json": {
       "main": [[{ "node": "Vytvoř PR", "type": "main", "index": 0 }]]
