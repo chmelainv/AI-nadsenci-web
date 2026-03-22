@@ -23,7 +23,7 @@
       "typeVersion": 1,
       "position": [420, 300],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst now = Date.now();\nconst eventId = String(item.json.event || '').trim() || 'UNKNOWN';\n\nreturn [{\n  json: {\n    team:          String(item.json.team || '').trim(),\n    description:   String(item.json.description || '').trim(),\n    eventId,\n    branchName:    `submission/${eventId}-${now}`,\n    photoRepoPath: `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath: `/images/submissions/${eventId}/${now}.jpg`,\n    activitiesPath: `public/content/events/${eventId}/activities.json`,\n    activityId:    String(now),\n    photoBase64:   (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '')\n  }\n}];"
+        "jsCode": "const item = items[0];\nconst now = Date.now();\nconst eventId = String(item.json.event || '').trim() || 'UNKNOWN';\n\n// Načti binární data ze storage (filesystem-v2 i paměť)\nlet photoBase64 = '';\ntry {\n  const buffer = await helpers.getBinaryDataBuffer(item, 'photo');\n  photoBase64 = buffer.toString('base64');\n} catch(e) {\n  photoBase64 = (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n}\n\nreturn [{\n  json: {\n    team:            String(item.json.team || '').trim(),\n    description:     String(item.json.description || '').trim(),\n    eventId,\n    branchName:      `submission/${eventId}-${now}`,\n    photoRepoPath:   `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath: `/images/submissions/${eventId}/${now}.jpg`,\n    activitiesPath:  `public/content/events/${eventId}/activities.json`,\n    activityId:      String(now),\n    photoBase64\n  }\n}];"
       }
     },
     {
