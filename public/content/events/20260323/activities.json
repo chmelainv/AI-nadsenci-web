@@ -3,6 +3,14 @@
   "title": "Jazykový model",
   "activities": [
     {
+      "id": "1774291033585",
+      "title": "Šiška",
+      "description": "Cerna skrinka, blby prompt = bordel na vystupu, dobry prompt = siska s prekvapenim",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774291033585.jpg",
+      "instructionsPhoto": "/images/submissions/20260323/1774291033585-instructions.jpg",
+      "instructionsText": "Jsi simulátor hmotných modelů (LLM) a tvým úkolem je naučit mě promptovat tak, aby trénovací výstup byl buď smysluplný (či ten, ŠTĚKA)."
       "id": "1774291017351",
       "title": "Petlêka",
       "description": "Základ jsou trenikova data, které vstupují do modelu, což jsou spojene šišky,  ktere pak tvori z promptu odpovedi. Model je zazipován bílým zipem, což je konkurencni vyhoda naseho modelu a značí i bezpecnost dat a odpovedí.",
