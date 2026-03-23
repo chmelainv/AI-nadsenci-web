@@ -178,6 +178,13 @@
             value="Otevřít">
         </div>
 
+        <!-- Instructions (read-only, from n8n submission) -->
+        <div class="instr-readonly hidden border-t border-gray-100 pt-3">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Instrukce (z odevzdání)</p>
+          <img class="instr-photo-preview hidden w-full rounded-lg object-contain border border-gray-100 mb-2" style="max-height:160px;">
+          <p class="instr-text-preview hidden text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 whitespace-pre-wrap"></p>
+        </div>
+
       </div>
     </div>
   </template>
@@ -323,6 +330,22 @@
       }
 
       inp.addEventListener('change', e => handlePhotoChange(e, card.id));
+
+      // Instructions (read-only display)
+      const instrSection = el.querySelector('.instr-readonly');
+      if (card.instructionsPhoto || card.instructionsText) {
+        instrSection.classList.remove('hidden');
+        if (card.instructionsPhoto) {
+          const img = instrSection.querySelector('.instr-photo-preview');
+          img.src = card.instructionsPhoto;
+          img.classList.remove('hidden');
+        }
+        if (card.instructionsText) {
+          const p = instrSection.querySelector('.instr-text-preview');
+          p.textContent = card.instructionsText;
+          p.classList.remove('hidden');
+        }
+      }
 
       // Live header update on title change
       el.querySelector('.field-title').addEventListener('input', e => {
@@ -471,8 +494,10 @@
         const payload = {
           eventId: state.eventId,
           title: pageTitle,
-          activities: state.cards.map(({ id, title, description, url, btnLabel, photo }) =>
-            ({ id, title, description, url, btnLabel, photo })),
+          activities: state.cards.map(({ id, title, description, url, btnLabel, photo, instructionsPhoto, instructionsText }) =>
+            ({ id, title, description, url, btnLabel, photo,
+               instructionsPhoto: instructionsPhoto || '',
+               instructionsText:  instructionsText  || '' })),
         };
         files.push({ path: `public/content/events/${state.eventId}/activities.json`, base64: jsonToBase64(payload) });
 
