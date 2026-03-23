@@ -76,6 +76,12 @@
         : a.description;
       const hasMore = a.description.length > 80;
 
+      const instrText = a.instructionsText || '';
+      const instrShort = instrText.length > 120
+        ? instrText.slice(0, 120).trimEnd() + '…'
+        : instrText;
+      const instrHasMore = instrText.length > 120;
+
       return `
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
           ${a.photo
@@ -97,6 +103,27 @@
                   Zobrazit více
                 </button>` : ''}
             </div>
+
+            ${a.instructionsPhoto ? `
+              <div class="mb-3">
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Instrukce</p>
+                <img src="${esc(a.instructionsPhoto)}" alt="Instrukce"
+                  class="w-full rounded-xl object-contain border border-gray-100" style="max-height:160px;">
+              </div>` : ''}
+
+            ${instrText ? `
+              <div class="mb-3">
+                ${!a.instructionsPhoto ? `<p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Instrukce</p>` : ''}
+                <div class="card-desc text-gray-500 text-xs leading-relaxed bg-gray-50 rounded-xl px-3 py-2" data-full="${esc(instrText)}">
+                  <span class="desc-short">${esc(instrShort)}</span>
+                  <span class="desc-full">${esc(instrText)}</span>
+                  ${instrHasMore ? `
+                    <button onclick="toggleDesc(this.closest('.card-desc'))"
+                      class="block text-purple-600 text-xs mt-1 hover:underline font-medium toggle-btn">
+                      Zobrazit více
+                    </button>` : ''}
+                </div>
+              </div>` : ''}
 
             ${a.url ? `
               <a href="${esc(a.url)}" target="_blank" rel="noopener"
