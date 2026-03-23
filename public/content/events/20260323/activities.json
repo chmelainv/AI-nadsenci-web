@@ -1,5 +1,16 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": []
+  "activities": [
+    {
+      "id": "1774283215862",
+      "title": "test",
+      "description": "lakfjdlau las jf",
+      "url": "",
+      "btnLabel": "Otevřít",
+      "photo": "/images/events/20260323/activities/1774283215862.png",
+      "instructionsPhoto": "/images/events/20260323/activities/1774283215862-instructions.png",
+      "instructionsText": "kontrola"
+    }
+  ]
 }
