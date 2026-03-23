@@ -1,5 +1,16 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": []
+  "activities": [
+    {
+      "id": "1774291036756",
+      "title": "Tym_7",
+      "description": "Vytvor slepice",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774291036756.jpg",
+      "instructionsPhoto": "/images/submissions/20260323/1774291036756-instructions.jpg",
+      "instructionsText": "Název týmu 4:\n\nInstrukce chování pro váš jazykový model:\n\nARCIVOČNÁ\nVEJCOSLAVA\nFILOSOFICKÁ SLEPICE\nVEJCE JE ZÁKLADNÍ\nJEDNOTKA\nMLUVÍ JAKO FREUD,\nOBČAS KVOKNE\nODPOVÍDATELNÁ\nZÁKLADNÍ FILOSOFICKÉ\nOTÁZKY\n\nZde odevzdejte"
+    }
+  ]
 }
