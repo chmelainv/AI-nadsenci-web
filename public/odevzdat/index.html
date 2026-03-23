@@ -49,10 +49,10 @@
         <p id="desc-count" class="text-xs text-gray-400 mt-1 text-right">0 / 1000</p>
       </div>
 
-      <!-- Fotka -->
+      <!-- Fotka výrobku -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-          Fotka
+          Fotka výrobku
         </label>
         <label class="block cursor-pointer">
           <div id="photo-zone"
@@ -66,6 +66,26 @@
           <input type="file" id="photo" accept="image/*" capture="environment" class="hidden">
         </label>
         <p class="text-xs text-gray-400 mt-1.5">Fotka bude automaticky zmenšena.</p>
+      </div>
+
+      <!-- Foto instrukcí -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+          Foto instrukcí
+          <span class="text-gray-400 font-normal">(volitelné)</span>
+        </label>
+        <label class="block cursor-pointer">
+          <div id="instructions-zone"
+            class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-purple-400 active:border-purple-500 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <p class="text-gray-500 text-sm font-medium">Klikni pro výběr fotky instrukcí</p>
+            <p class="text-gray-400 text-xs mt-1">nebo ji sem přetáhni</p>
+          </div>
+          <input type="file" id="instructions" accept="image/*" capture="environment" class="hidden">
+        </label>
+        <p class="text-xs text-gray-400 mt-1.5">Text z instrukcí bude automaticky přepsán pomocí OCR.</p>
       </div>
 
       <!-- Submit -->
@@ -112,7 +132,6 @@
 
   <script>
     // ── Konfigurace ────────────────────────────────────────────────────────
-    // Sem doplň URL n8n webhooku až bude připravený:
     const WEBHOOK_URL = 'https://auto.maronext.cz/webhook/submission';
 
     // Maximální rozměr fotky po resize (px) a kvalita JPEG (0–1)
@@ -121,6 +140,7 @@
     // ──────────────────────────────────────────────────────────────────────
 
     let resizedBlob = null;
+    let resizedInstructionsBlob = null;
 
     window.addEventListener('load', () => {
       if (!WEBHOOK_URL) {
@@ -139,28 +159,37 @@
         document.getElementById('desc-count').textContent = `${e.target.value.length} / 1000`;
       });
 
-      // Foto picker
-      document.getElementById('photo').addEventListener('change', handlePhoto);
-
-      // Drag & drop
-      const zone = document.getElementById('photo-zone');
-      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('border-blue-400'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('border-blue-400'));
-      zone.addEventListener('drop', e => {
-        e.preventDefault();
-        zone.classList.remove('border-blue-400');
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) processPhoto(file);
+      // Foto pickery
+      document.getElementById('photo').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) processFile(file, 'photo');
       });
+      document.getElementById('instructions').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) processFile(file, 'instructions');
+      });
+
+      // Drag & drop — výrobek
+      setupDrop('photo-zone', 'photo');
+      // Drag & drop — instrukce
+      setupDrop('instructions-zone', 'instructions');
     });
 
-    // ── Zpracování fotky ───────────────────────────────────────────────────
-    function handlePhoto(e) {
-      const file = e.target.files[0];
-      if (file) processPhoto(file);
+    function setupDrop(zoneId, target) {
+      const zone = document.getElementById(zoneId);
+      const hoverClass = target === 'photo' ? 'border-blue-400' : 'border-purple-400';
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add(hoverClass); });
+      zone.addEventListener('dragleave', () => zone.classList.remove(hoverClass));
+      zone.addEventListener('drop', e => {
+        e.preventDefault();
+        zone.classList.remove(hoverClass);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) processFile(file, target);
+      });
     }
 
-    function processPhoto(file) {
+    // ── Zpracování fotky ───────────────────────────────────────────────────
+    function processFile(file, target) {
       if (file.size > 20 * 1024 * 1024) {
         alert('Fotka je příliš velká (max 20 MB před zmenšením).');
         return;
@@ -170,7 +199,6 @@
       reader.onload = ev => {
         const img = new Image();
         img.onload = () => {
-          // Resize přes Canvas
           let { width, height } = img;
           if (width > PHOTO_MAX_PX || height > PHOTO_MAX_PX) {
             if (width > height) { height = Math.round(height * PHOTO_MAX_PX / width); width = PHOTO_MAX_PX; }
@@ -180,10 +208,12 @@
           canvas.width = width; canvas.height = height;
           canvas.getContext('2d').drawImage(img, 0, 0, width, height);
           canvas.toBlob(blob => {
-            resizedBlob = blob;
+            const zoneId = target === 'photo' ? 'photo-zone' : 'instructions-zone';
+            if (target === 'photo') resizedBlob = blob;
+            else resizedInstructionsBlob = blob;
             const url = URL.createObjectURL(blob);
             const sizeKB = Math.round(blob.size / 1024);
-            document.getElementById('photo-zone').innerHTML = `
+            document.getElementById(zoneId).innerHTML = `
               <img src="${url}" class="max-h-48 mx-auto rounded-lg object-contain mb-2">
               <p class="text-xs text-gray-400">${width}×${height}px · ${sizeKB} kB · Klikni pro změnu</p>
             `;
@@ -202,12 +232,11 @@
       const description = document.getElementById('description').value.trim();
 
       if (!resizedBlob) {
-        alert('Přidej prosím fotku.');
+        alert('Přidej prosím fotku výrobku.');
         return;
       }
 
       setState('sending');
-      setSendingLabel('Odesílám…');
 
       try {
         const eventId = new URLSearchParams(location.search).get('event') || '';
@@ -216,6 +245,9 @@
         fd.append('description', description);
         fd.append('event',       eventId);
         fd.append('photo',       resizedBlob, `foto-${Date.now()}.jpg`);
+        if (resizedInstructionsBlob) {
+          fd.append('instructions', resizedInstructionsBlob, `instrukce-${Date.now()}.jpg`);
+        }
 
         const res = await fetch(WEBHOOK_URL, { method: 'POST', body: fd });
 
@@ -239,23 +271,27 @@
       else document.getElementById('form').classList.remove('hidden');
     }
 
-    function setSendingLabel(text) {
-      document.getElementById('sending-label').textContent = text;
-    }
-
     function resetForm() {
       resizedBlob = null;
+      resizedInstructionsBlob = null;
       document.getElementById('form').reset();
       const team = new URLSearchParams(location.search).get('team') || '';
       if (team) document.getElementById('team').value = team;
-      document.getElementById('photo-zone').innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        <p class="text-gray-500 text-sm font-medium">Klikni pro výběr fotky</p>
+      restoreZone('photo-zone', false);
+      restoreZone('instructions-zone', true);
+      setState('form');
+    }
+
+    function restoreZone(zoneId, isInstructions) {
+      const icon = isInstructions
+        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>`;
+      const label = isInstructions ? 'Klikni pro výběr fotky instrukcí' : 'Klikni pro výběr fotky';
+      document.getElementById(zoneId).innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">${icon}</svg>
+        <p class="text-gray-500 text-sm font-medium">${label}</p>
         <p class="text-gray-400 text-xs mt-1">nebo ji sem přetáhni</p>
       `;
-      setState('form');
     }
   </script>
 </body>
