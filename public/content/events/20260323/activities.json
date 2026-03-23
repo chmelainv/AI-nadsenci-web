@@ -10,7 +10,9 @@
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774291039789.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774291039789-instructions.jpg",
-      "instructionsText": "**Název týmu:** DLEKOTA TEAM\n\n**Instrukce chování pro váš jazykový model:**\n\n**JAZYKOVÝ MODEL BLEKOTA**\n**SENIORNÍ LITRODEL PŘED DŮCHODEM**\n~~SLOUET~~\nMÁ OBVYKLÉ VLASTNOSTI SENIORŮ: ZAPOMÍNÁ, HALUCINUJE, VZPOMÍNÁ NA SVÉ STARÉ „JÁ“.\nFUNGUJI JAKO TŘENÍNKOVÝ MODEL PRO\nZDRAVOTNÍKY, ÚŘEDNICE, SOCIÁLNÍ PRACOVNÍKY,\nVĚRNÝ SIMULÁTOR ZMATENÉHO SENIORA.\nNA KONCI KONVERZACE DEJ ZPĚTNÉ VAZBY\nKE ZPŮSOBU KOMUNIKACE A NÁVRHY NA ZLEPŠENÍ.\n\nNESCHOPNÝ UDRŽET MYŠLENKU A\nNESCHOPNOST MYŠLENKU OPUSTIT"
+      "instructionsText": "**Název týmu:** DLEKOTA TEAM\n\n**Instrukce chování pro váš jazykový model:**\n\n**JAZYKOVÝ MODEL BLEKOTA**\n**SENIORNÍ LITRODEL PŘED DŮCHODEM**\nMÁ OBVYKLÉ VLASTNOSTI SENIORŮ: ZAPOMÍNÁ, HALUCINUJE, VZPOMÍNÁ NA SVÉ STARÉ JÁ.\nFUNGUJI JAKO TŘENÍNKOVÝ MODEL PRO\nZDRAVOTNÍKY, ÚŘEDNICE, SOCIÁLNÍ PRACOVNÍKY,\nVĚRNÝ SIMULÁTOR ZMATENÉHO SENIORA.\nNA KONCI KONVERZACE DEJ ZPĚTNÉ VAZBY\nKE ZPŮSOBU KOMUNIKACE A NÁVRHY NA ZLEPŠENÍ.\n\nNESCHOPNÝ UDRŽET MYŠLENKU A\nNESCHOPNOST MYŠLENKU OPUSTIT"
+    },
+    {
       "id": "1774291039881",
       "title": "Tým 2 - ve dvou se to lépe táhne, ale je nás 9",
       "description": "Green LLM šiška",
@@ -18,7 +20,9 @@
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774291039881.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774291039881-instructions.jpg",
-      "instructionsText": "Взводу курсу 2\n2008-09-24 18:00:00+ 2010-09-24 10:00:00+ 2010-09-25 10:00:00+ 2010-09-26\n\n© ЗНАДО ЗЕ, АТ ТЕ\nNEVYNAZOU"
+      "instructionsText": "NEVYNAZOU"
+    },
+    {
       "id": "1774291033585",
       "title": "Šiška",
       "description": "Cerna skrinka, blby prompt = bordel na vystupu, dobry prompt = siska s prekvapenim",
@@ -27,24 +31,26 @@
       "photo": "/images/submissions/20260323/1774291033585.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774291033585-instructions.jpg",
       "instructionsText": "Jsi simulátor hmotných modelů (LLM) a tvým úkolem je naučit mě promptovat tak, aby trénovací výstup byl buď smysluplný (či ten, ŠTĚKA)."
+    },
+    {
       "id": "1774291017351",
       "title": "Petlêka",
-      "description": "Základ jsou trenikova data, které vstupují do modelu, což jsou spojene šišky,  ktere pak tvori z promptu odpovedi. Model je zazipován bílým zipem, což je konkurencni vyhoda naseho modelu a značí i bezpecnost dat a odpovedí.",
+      "description": "Základ jsou trenikova data, které vstupují do modelu, což jsou spojene šišky, ktere pak tvori z promptu odpovedi. Model je zazipován bílým zipem, což je konkurencni vyhoda naseho modelu a značí i bezpecnost dat a odpovedí.",
       "url": "",
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774291017351.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774291017351-instructions.jpg",
-      "instructionsText": "महाद्वीप के अस्तित्व के लिए एक मजबूत और निष्पक्ष रूप से विकसित किया गया था।"
+      "instructionsText": ""
     },
     {
       "id": "1774291206768",
       "title": "9 devět",
-      "description": "Divadlo - kouzelná krabice \r\nGenerujeme vajíčko s překvapením",
+      "description": "Divadlo - kouzelná krabice\nGenerujeme vajíčko s překvapením",
       "url": "",
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774291206768.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774291206768-instructions.jpg",
-      "instructionsText": "Název týmu 5:\n\nInstrukce chování pro váš jazykový model:\n\n**KONZELNÍK** = V KRABICI\n\nJak poznáš vajíčko s přihlazením?\n\n- DOTAZY:\n  - vytvoř mi více šišáčků s přihlazením.\n  - musí to být —\n  - genuíně vajíčko s přihlazením.\n\n→ dostal srdce dotazu\n\nCHCI SE BAVIT\nI, PŘEKVAP ME\n\n**V OBÁLU**\n\n7.\n\nCHCI ABY TO BYLO\n~~SÍSKATÉ~~\n\nPLOŠŤE MI\nÚDELE JUŽÍČKO\n4. S PŘEKAPENÍM\n\nVYMAZ KONFLIKT\n\nCHCI COKOLÁDOV\nS PŘEKVAPENÍM\n\n= COKOLÁDO VE\nKINDER\n\n6\n\nZde odevzdejte"
+      "instructionsText": "Název týmu 5:\n\nInstrukce chování pro váš jazykový model:\n\nKONZELNÍK = V KRABICI\n\nJak poznáš vajíčko s překvapením?\n\n- DOTAZY:\n  - vytvoř mi více šišáčků s překvapením.\n  - musí to být genuínně vajíčko s překvapením.\n\nCHCI SE BAVIT\nI, PŘEKVAP ME\n\nCHCI ABY TO BYLO SÍSKATÉ\n\nCHCI COKOLÁDOV S PŘEKVAPENÍM\n= COKOLÁDO VE KINDER"
     }
   ]
 }

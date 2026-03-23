@@ -6,7 +6,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [200, 300],
+      "position": [
+        200,
+        300
+      ],
       "parameters": {
         "path": "submission",
         "httpMethod": "POST",
@@ -21,47 +24,12 @@
       "name": "Připrav data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [420, 300],
+      "position": [
+        420,
+        300
+      ],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst now = Date.now();\n// multipart/form-data: textová pole jsou pod item.json.body\nconst body = item.json.body || item.json;\nconst eventId = String(body.event || '').trim() || 'UNKNOWN';\n\n// Načti binární data fotky výrobku\nlet photoBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'photo');\n  photoBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'photo');\n    photoBase64 = buffer.toString('base64');\n  } catch(e2) {\n    photoBase64 = (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\n// Načti binární data fotky instrukcí (volitelné)\nlet instructionsBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'instructions');\n  instructionsBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'instructions');\n    instructionsBase64 = buffer.toString('base64');\n  } catch(e2) {\n    instructionsBase64 = (item.binary?.instructions?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\nreturn [{\n  json: {\n    team:                  String(body.team || '').trim(),\n    description:           String(body.description || '').trim(),\n    eventId,\n    branchName:            `submission/${eventId}-${now}`,\n    photoRepoPath:         `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath:       `/images/submissions/${eventId}/${now}.jpg`,\n    instructionsRepoPath:  `public/images/submissions/${eventId}/${now}-instructions.jpg`,\n    instructionsPublicPath:`/images/submissions/${eventId}/${now}-instructions.jpg`,\n    activitiesPath:        `public/content/events/${eventId}/activities.json`,\n    activityId:            String(now),\n    photoBase64,\n    instructionsBase64\n  }\n}];"
-      }
-    },
-    {
-      "id": "node-get-head",
-      "name": "Načti HEAD main",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [640, 300],
-      "parameters": {
-        "method": "GET",
-        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/git/refs/heads/main",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "headerAuth",
-        "options": {}
-      },
-      "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
-      }
-    },
-    {
-      "id": "node-create-branch",
-      "name": "Vytvoř větev",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [860, 300],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/git/refs",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "headerAuth",
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ ref: 'refs/heads/' + $('Připrav data').item.json.branchName, sha: $json.object.sha }) }}",
-        "options": {}
-      },
-      "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
+        "jsCode": "const item = items[0];\nconst now = Date.now();\n// multipart/form-data: textová pole jsou pod item.json.body\nconst body = item.json.body || item.json;\nconst eventId = String(body.event || '').trim() || 'UNKNOWN';\n\n// Načti binární data fotky výrobku\nlet photoBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'photo');\n  photoBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'photo');\n    photoBase64 = buffer.toString('base64');\n  } catch(e2) {\n    photoBase64 = (item.binary?.photo?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\n// Načti binární data fotky instrukcí (volitelné)\nlet instructionsBase64 = '';\ntry {\n  const buffer = await this.helpers.getBinaryDataBuffer(0, 'instructions');\n  instructionsBase64 = buffer.toString('base64');\n} catch(e1) {\n  try {\n    const buffer = await helpers.getBinaryDataBuffer(item, 'instructions');\n    instructionsBase64 = buffer.toString('base64');\n  } catch(e2) {\n    instructionsBase64 = (item.binary?.instructions?.data ?? '').replace(/[\\r\\n\\s]/g, '');\n  }\n}\n\nreturn [{\n  json: {\n    team:                  String(body.team || '').trim(),\n    description:           String(body.description || '').trim(),\n    eventId,\n    // Commit přímo do main — žádné PR větve\n    branchName:            'main',\n    photoRepoPath:         `public/images/submissions/${eventId}/${now}.jpg`,\n    photoPublicPath:       `/images/submissions/${eventId}/${now}.jpg`,\n    instructionsRepoPath:  `public/images/submissions/${eventId}/${now}-instructions.jpg`,\n    instructionsPublicPath:`/images/submissions/${eventId}/${now}-instructions.jpg`,\n    activitiesPath:        `public/content/events/${eventId}/activities.json`,\n    activityId:            String(now),\n    photoBase64,\n    instructionsBase64\n  }\n}];"
       }
     },
     {
@@ -69,7 +37,10 @@
       "name": "Načti activities.json",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1080, 300],
+      "position": [
+        1080,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "GET",
@@ -79,7 +50,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
+        "headerAuth": {
+          "name": "GitHub Token"
+        }
       }
     },
     {
@@ -87,7 +60,10 @@
       "name": "OCR instrukcí",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1300, 300],
+      "position": [
+        1300,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -101,7 +77,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "Mistral API Key" }
+        "headerAuth": {
+          "name": "Mistral API Key"
+        }
       }
     },
     {
@@ -109,7 +87,10 @@
       "name": "Extrahuj text OCR",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [1520, 300],
+      "position": [
+        1520,
+        300
+      ],
       "parameters": {
         "jsCode": "const item = items[0];\nlet instructionsText = '';\n// Mistral OCR vrací { pages: [{ markdown: '...' }] }\nif (Array.isArray(item.json?.pages) && item.json.pages.length > 0) {\n  instructionsText = item.json.pages.map(p => p.markdown || '').join('\\n').trim();\n}\n// Fallback: chat completions formát\nif (!instructionsText && item.json?.choices?.[0]?.message?.content) {\n  instructionsText = item.json.choices[0].message.content.trim();\n}\nreturn [{ json: { instructionsText } }];"
       }
@@ -119,7 +100,10 @@
       "name": "Korekce textu",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1740, 300],
+      "position": [
+        1740,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "POST",
@@ -133,7 +117,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "Mistral API Key" }
+        "headerAuth": {
+          "name": "Mistral API Key"
+        }
       }
     },
     {
@@ -141,7 +127,10 @@
       "name": "Extrahuj korekci",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [1960, 300],
+      "position": [
+        1960,
+        300
+      ],
       "parameters": {
         "jsCode": "const item = items[0];\n// Pokud korekce proběhla, použij opravený text\nconst corrected = item.json?.choices?.[0]?.message?.content?.trim() || '';\n// Fallback na původní OCR text\nconst original  = $node['Extrahuj text OCR'].json.instructionsText || '';\nreturn [{ json: { instructionsText: corrected || original } }];"
       }
@@ -151,7 +140,10 @@
       "name": "Sestav activities.json",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [2180, 300],
+      "position": [
+        2180,
+        300
+      ],
       "parameters": {
         "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\nconst instructionsText = $node['Extrahuj korekci'].json.instructionsText || '';\n\n// SHA existujícího souboru — nutné pro GitHub PUT update (bez SHA vrátí 422)\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:                   prep.activityId,\n  title:                prep.team,\n  description:          prep.description,\n  url:                  '',\n  btnLabel:             'Zobrazit',\n  photo:                prep.photoPublicPath,\n  instructionsPhoto:    prep.instructionsBase64 ? prep.instructionsPublicPath : '',\n  instructionsText\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
       }
@@ -161,7 +153,10 @@
       "name": "Nahraj fotku",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [2400, 300],
+      "position": [
+        2400,
+        300
+      ],
       "parameters": {
         "method": "PUT",
         "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.photoRepoPath }}",
@@ -174,7 +169,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
+        "headerAuth": {
+          "name": "GitHub Token"
+        }
       }
     },
     {
@@ -182,7 +179,10 @@
       "name": "Připrav upload instrukcí",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [2620, 300],
+      "position": [
+        2620,
+        300
+      ],
       "parameters": {
         "jsCode": "// Připraví URL a body pro nahrání fotky instrukcí\n// Pokud instructions nebyly nahrány, vrátí prázdné stringy → Nahraj foto instrukcí selže tiše (continueOnFail)\nconst d = $('Sestav activities.json').item.json;\n\nreturn [{\n  json: {\n    instrUrl:  'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + d.instructionsRepoPath,\n    instrBody: JSON.stringify({\n      message: 'submission: instrukce ' + d.team,\n      content: d.instructionsBase64,\n      branch:  d.branchName\n    })\n  }\n}];"
       }
@@ -192,7 +192,10 @@
       "name": "Nahraj foto instrukcí",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [2840, 300],
+      "position": [
+        2840,
+        300
+      ],
       "continueOnFail": true,
       "parameters": {
         "method": "PUT",
@@ -206,7 +209,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
+        "headerAuth": {
+          "name": "GitHub Token"
+        }
       }
     },
     {
@@ -214,7 +219,10 @@
       "name": "Připrav JSON upload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [3060, 300],
+      "position": [
+        3060,
+        300
+      ],
       "parameters": {
         "jsCode": "// Připraví URL a body pro nahrání activities.json jako plain string\n// (komplexní výrazy v HTTP Request URL/body polích v n8n mohou selhat s 'invalid syntax')\nconst d = $('Sestav activities.json').item.json;\n\nconst bodyObj = {\n  message: 'submission: data ' + d.team,\n  content: d.newActivitiesBase64,\n  branch:  d.branchName\n};\n// SHA je povinné pokud soubor již existuje, jinak GitHub vrátí 422\nif (d.activitiesSha) bodyObj.sha = d.activitiesSha;\n\nreturn [{\n  json: {\n    uploadUrl:  'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + d.activitiesPath,\n    uploadBody: JSON.stringify(bodyObj),\n    // metadata pro Vytvoř PR\n    team:            d.team,\n    description:     d.description,\n    photoPublicPath: d.photoPublicPath,\n    branchName:      d.branchName\n  }\n}];"
       }
@@ -224,7 +232,10 @@
       "name": "Nahraj activities.json",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [3280, 300],
+      "position": [
+        3280,
+        300
+      ],
       "parameters": {
         "method": "PUT",
         "url": "={{ $json.uploadUrl }}",
@@ -237,28 +248,9 @@
         "options": {}
       },
       "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
-      }
-    },
-    {
-      "id": "node-create-pr",
-      "name": "Vytvoř PR",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [3500, 300],
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/pulls",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "headerAuth",
-        "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ JSON.stringify({ title: '🎯 Aktivita: ' + $('Připrav JSON upload').item.json.team, body: '**Tým:** ' + $('Připrav JSON upload').item.json.team + '\\n\\n**Popis:**\\n' + $('Připrav JSON upload').item.json.description + '\\n\\n**Fotka:** ' + $('Připrav JSON upload').item.json.photoPublicPath, head: $('Připrav JSON upload').item.json.branchName, base: 'main' }) }}",
-        "options": {}
-      },
-      "credentials": {
-        "headerAuth": { "name": "GitHub Token" }
+        "headerAuth": {
+          "name": "GitHub Token"
+        }
       }
     },
     {
@@ -266,7 +258,10 @@
       "name": "Odpověz 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [3720, 300],
+      "position": [
+        3720,
+        300
+      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={ \"ok\": true }"
@@ -275,52 +270,147 @@
   ],
   "connections": {
     "Webhook": {
-      "main": [[{ "node": "Připrav data", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Připrav data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Připrav data": {
-      "main": [[{ "node": "Načti HEAD main", "type": "main", "index": 0 }]]
-    },
-    "Načti HEAD main": {
-      "main": [[{ "node": "Vytvoř větev", "type": "main", "index": 0 }]]
-    },
-    "Vytvoř větev": {
-      "main": [[{ "node": "Načti activities.json", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Načti activities.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Načti activities.json": {
-      "main": [[{ "node": "OCR instrukcí", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "OCR instrukcí",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "OCR instrukcí": {
-      "main": [[{ "node": "Extrahuj text OCR", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Extrahuj text OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Extrahuj text OCR": {
-      "main": [[{ "node": "Korekce textu", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Korekce textu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Korekce textu": {
-      "main": [[{ "node": "Extrahuj korekci", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Extrahuj korekci",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Extrahuj korekci": {
-      "main": [[{ "node": "Sestav activities.json", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Sestav activities.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sestav activities.json": {
-      "main": [[{ "node": "Nahraj fotku", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Nahraj fotku",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Nahraj fotku": {
-      "main": [[{ "node": "Připrav upload instrukcí", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Připrav upload instrukcí",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Připrav upload instrukcí": {
-      "main": [[{ "node": "Nahraj foto instrukcí", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Nahraj foto instrukcí",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Nahraj foto instrukcí": {
-      "main": [[{ "node": "Připrav JSON upload", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Připrav JSON upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Připrav JSON upload": {
-      "main": [[{ "node": "Nahraj activities.json", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Nahraj activities.json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Nahraj activities.json": {
-      "main": [[{ "node": "Vytvoř PR", "type": "main", "index": 0 }]]
-    },
-    "Vytvoř PR": {
-      "main": [[{ "node": "Odpověz 200", "type": "main", "index": 0 }]]
+      "main": [
+        [
+          {
+            "node": "Odpověz 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
