@@ -178,12 +178,21 @@
             value="Otevřít">
         </div>
 
-        <!-- Instructions (read-only, from n8n submission) -->
-        <div class="instr-readonly hidden border-t border-gray-100 pt-3">
-          <p class="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Instrukce (z odevzdání)</p>
-          <img class="instr-photo-preview hidden w-full rounded-lg object-contain border border-gray-100 mb-2" style="max-height:160px;">
-          <p class="instr-text-preview hidden text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 whitespace-pre-wrap"></p>
+        <!-- Instructions text -->
+        <div class="border-t border-gray-100 pt-3">
+          <label class="block text-xs font-medium text-gray-600 mb-1.5">Text instrukcí</label>
+          <textarea class="field-instr-text w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none" rows="3"
+            placeholder="Přepsaný text instrukcí (lze zadat ručně nebo upravit výstup OCR)…"></textarea>
         </div>
+
+        <!-- Instructions photo -->
+        <label class="block cursor-pointer">
+          <p class="text-xs font-medium text-gray-600 mb-1.5">Foto instrukcí</p>
+          <div class="instr-dropzone border-2 border-dashed border-gray-200 rounded-lg p-5 text-center hover:border-purple-400 transition-colors">
+            <p class="text-gray-400 text-xs">Klikni nebo přetáhni foto instrukcí</p>
+          </div>
+          <input type="file" accept="image/*" class="instr-input hidden">
+        </label>
 
       </div>
     </div>
@@ -331,28 +340,25 @@
 
       inp.addEventListener('change', e => handlePhotoChange(e, card.id));
 
-      // Instructions (read-only display)
-      const instrSection = el.querySelector('.instr-readonly');
-      if (card.instructionsPhoto || card.instructionsText) {
-        instrSection.classList.remove('hidden');
-        if (card.instructionsPhoto) {
-          const img = instrSection.querySelector('.instr-photo-preview');
-          img.src = card.instructionsPhoto;
-          img.classList.remove('hidden');
-        }
-        if (card.instructionsText) {
-          const p = instrSection.querySelector('.instr-text-preview');
-          p.textContent = card.instructionsText;
-          p.classList.remove('hidden');
-        }
+      // Instructions text
+      el.querySelector('.field-instr-text').value = card.instructionsText || '';
+
+      // Instructions photo dropzone
+      const instrDz  = el.querySelector('.instr-dropzone');
+      const instrInp = el.querySelector('.instr-input');
+      if (card._instrPreviewUrl || card.instructionsPhoto) {
+        instrDz.innerHTML = `<img src="${esc(card._instrPreviewUrl || card.instructionsPhoto)}"
+          class="max-h-28 mx-auto rounded object-contain mb-1">
+          <p class="text-xs text-gray-400">Klikni pro změnu</p>`;
       }
+      instrInp.addEventListener('change', e => handleInstrPhotoChange(e, card.id));
 
       // Live header update on title change
       el.querySelector('.field-title').addEventListener('input', e => {
         el.querySelector('.card-label').textContent = e.target.value || 'Nová karta';
         syncCardFromDom(card.id);
       });
-      ['field-desc', 'field-url', 'field-btn'].forEach(cls => {
+      ['field-desc', 'field-url', 'field-btn', 'field-instr-text'].forEach(cls => {
         el.querySelector('.' + cls).addEventListener('input', () => syncCardFromDom(card.id));
       });
 
@@ -364,16 +370,17 @@
       if (!el) return;
       const card = state.cards.find(c => c.id === cardId);
       if (!card) return;
-      card.title       = el.querySelector('.field-title').value;
-      card.description = el.querySelector('.field-desc').value;
-      card.url         = el.querySelector('.field-url').value;
-      card.btnLabel    = el.querySelector('.field-btn').value;
+      card.title            = el.querySelector('.field-title').value;
+      card.description      = el.querySelector('.field-desc').value;
+      card.url              = el.querySelector('.field-url').value;
+      card.btnLabel         = el.querySelector('.field-btn').value;
+      card.instructionsText = el.querySelector('.field-instr-text').value;
     }
 
     // ── Card actions ────────────────────────────────────────────────────
     function addCard() {
       const id = String(Date.now());
-      state.cards.push({ id, title: '', description: '', url: '', btnLabel: 'Otevřít', photo: null, _file: null, _previewUrl: null });
+      state.cards.push({ id, title: '', description: '', url: '', btnLabel: 'Otevřít', photo: null, _file: null, _previewUrl: null, instructionsPhoto: '', instructionsText: '', _instrFile: null, _instrPreviewUrl: null });
       renderCards();
       // Open new card
       const el = document.querySelector(`.card-editor[data-id="${id}"]`);
@@ -402,6 +409,26 @@
     function toggleCard(header) {
       const editor = header.closest('.card-editor');
       editor.classList.toggle('collapsed');
+    }
+
+    function handleInstrPhotoChange(e, cardId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { alert('Max 10 MB'); return; }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const card = state.cards.find(c => c.id === cardId);
+        if (!card) return;
+        card._instrFile = file;
+        card._instrPreviewUrl = ev.target.result;
+        const el = document.querySelector(`.card-editor[data-id="${cardId}"]`);
+        if (el) {
+          el.querySelector('.instr-dropzone').innerHTML = `
+            <img src="${esc(ev.target.result)}" class="max-h-28 mx-auto rounded object-contain mb-1">
+            <p class="text-xs text-gray-400">Klikni pro změnu</p>`;
+        }
+      };
+      reader.readAsDataURL(file);
     }
 
     function handlePhotoChange(e, cardId) {
@@ -481,12 +508,20 @@
 
         // Fotky nových/změněných karet
         for (const card of state.cards) {
-          if (!card._file) continue;
-          const ext  = card._file.name.split('.').pop().toLowerCase() || 'jpg';
-          card.photo = `/images/events/${state.eventId}/activities/${card.id}.${ext}`;
-          files.push({ path: `public/images/events/${state.eventId}/activities/${card.id}.${ext}`, base64: await fileToBase64(card._file) });
-          card._file = null;
-          card._previewUrl = null;
+          if (card._file) {
+            const ext  = card._file.name.split('.').pop().toLowerCase() || 'jpg';
+            card.photo = `/images/events/${state.eventId}/activities/${card.id}.${ext}`;
+            files.push({ path: `public/images/events/${state.eventId}/activities/${card.id}.${ext}`, base64: await fileToBase64(card._file) });
+            card._file = null;
+            card._previewUrl = null;
+          }
+          if (card._instrFile) {
+            const ext  = card._instrFile.name.split('.').pop().toLowerCase() || 'jpg';
+            card.instructionsPhoto = `/images/events/${state.eventId}/activities/${card.id}-instructions.${ext}`;
+            files.push({ path: `public/images/events/${state.eventId}/activities/${card.id}-instructions.${ext}`, base64: await fileToBase64(card._instrFile) });
+            card._instrFile = null;
+            card._instrPreviewUrl = null;
+          }
         }
 
         // activities.json
