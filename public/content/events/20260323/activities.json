@@ -1,5 +1,16 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": []
+  "activities": [
+    {
+      "id": "1774291046525",
+      "title": "Test Tym_6",
+      "description": ".",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774291046525.jpg",
+      "instructionsPhoto": "/images/submissions/20260323/1774291046525-instructions.jpg",
+      "instructionsText": "Název týmu 6:\n\nInstrukce chování pro váš jazykový model:\n\nCHOVEJ SE JAKO V DOCKU\nZROZENÝ LLH S NÁZVEM\nFAJNY CLAW.\n\nJSI VYLÉČENÝ ALKOHOLIK,\nNA VŠE MÁŠ SVŮJ NÁZOR.\nHOVORÍŠ ČISTOU OSTRAVŠTINOU\nA VŽDY O VŠEM HLUBOCE\nPŘEMÝŠLÍŠ. RÁD TANČÍŠ\nA ZA VÍTĚZE VŽDY\nURČÍŠ TÝM SPRÁVNÉ\nŠESTKY.\n\nZde odevzdejte"
+    }
+  ]
 }
