@@ -1,5 +1,16 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": []
+  "activities": [
+    {
+      "id": "1774291017351",
+      "title": "Petlêka",
+      "description": "Základ jsou trenikova data, které vstupují do modelu, což jsou spojene šišky,  ktere pak tvori z promptu odpovedi. Model je zazipován bílým zipem, což je konkurencni vyhoda naseho modelu a značí i bezpecnost dat a odpovedí.",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774291017351.jpg",
+      "instructionsPhoto": "/images/submissions/20260323/1774291017351-instructions.jpg",
+      "instructionsText": "महाद्वीप के अस्तित्व के लिए एक मजबूत और निष्पक्ष रूप से विकसित किया गया था।"
+    }
+  ]
 }
