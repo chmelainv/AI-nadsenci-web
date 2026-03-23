@@ -1,36 +1,5 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": [
-    {
-      "id": "1774267577366",
-      "title": "Test Tym první testovaci",
-      "description": "Tohle je nový pokus jak se odlišit.",
-      "url": "https://app.maronext.cz/admin/prepravy/b9925a09-7473-4ae2-80d0-a2d25bd907f0/print",
-      "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774267577366.jpg",
-      "instructionsPhoto": "",
-      "instructionsText": ""
-    },
-    {
-      "id": "1774269837825",
-      "title": "Test Tym",
-      "description": "Něco úžasného",
-      "url": "https://app.maronext.cz/",
-      "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774269837825.jpg",
-      "instructionsPhoto": "/images/submissions/20260323/1774269837825-instructions.jpg",
-      "instructionsText": "KONTROLNÍ TEST\nINSTRUKCÍ, JAK SE\nMÁ NÁS SUPER MOJEL\nCHOVAT. MÁ BYT PRATE- LSAÝ. NESMÍ SE NICÍM\nPROVINIT, ANI NIKOMU\nUBLIŽIT."
-    },
-    {
-      "id": "1774275563587",
-      "title": "Test Tym 4",
-      "description": "Tesjifdjd djsjd fjdjd",
-      "url": "",
-      "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774275563587.jpg",
-      "instructionsPhoto": "/images/submissions/20260323/1774275563587-instructions.jpg",
-      "instructionsText": "KONTROLNÍ TEST\nINSTRUKCÍ, JAK SE\nMÁ NÁS SUPER MOJEL\nCHOVAT. MÁ BÝT PRÁTEL- SKÝ. NESMÍ SE NIČÍM\nPROVINIT, ANI NIKOMU\nUBLIŽIT."
-    }
-  ]
+  "activities": []
 }
