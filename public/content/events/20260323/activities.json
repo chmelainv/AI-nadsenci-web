@@ -8,7 +8,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203389090",
@@ -16,7 +18,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203399566",
@@ -24,7 +28,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203414593",
@@ -32,7 +38,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203434330",
@@ -40,7 +48,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203445399",
@@ -48,7 +58,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203458696",
@@ -56,7 +68,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774203487792",
@@ -64,7 +78,9 @@
       "description": "",
       "url": "",
       "btnLabel": "Otevřít",
-      "photo": null
+      "photo": null,
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774217039310",
@@ -72,7 +88,9 @@
       "description": "UI komponenty (shadcn/ui, Tailwind, layout, header, footer)\nDesign systém (barvy, typografie, responzivita, dark mode)\nAuth flow základ (registrační formulář, login page)\nQR attendance logika (adaptace API + UI)\nNetworking hra (adaptace)",
       "url": "",
       "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774217039310.jpg"
+      "photo": "/images/submissions/20260323/1774217039310.jpg",
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774267577366",
@@ -80,13 +98,15 @@
       "description": "Tohle je nový pokus jak se odlišit.",
       "url": "https://app.maronext.cz/admin/prepravy/b9925a09-7473-4ae2-80d0-a2d25bd907f0/print",
       "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774267577366.jpg"
+      "photo": "/images/submissions/20260323/1774267577366.jpg",
+      "instructionsPhoto": "",
+      "instructionsText": ""
     },
     {
       "id": "1774269837825",
       "title": "Test Tym",
       "description": "Něco úžasného",
-      "url": "",
+      "url": "https://app.maronext.cz/",
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774269837825.jpg",
       "instructionsPhoto": "/images/submissions/20260323/1774269837825-instructions.jpg",
