@@ -1,5 +1,16 @@
 {
   "eventId": "20260323",
   "title": "Jazykový model",
-  "activities": []
+  "activities": [
+    {
+      "id": "1774291033585",
+      "title": "Šiška",
+      "description": "Cerna skrinka, blby prompt = bordel na vystupu, dobry prompt = siska s prekvapenim",
+      "url": "",
+      "btnLabel": "Zobrazit",
+      "photo": "/images/submissions/20260323/1774291033585.jpg",
+      "instructionsPhoto": "/images/submissions/20260323/1774291033585-instructions.jpg",
+      "instructionsText": "Jsi simulátor hmotných modelů (LLM) a tvým úkolem je naučit mě promptovat tak, aby trénovací výstup byl buď smysluplný (či ten, ŠTĚKA)."
+    }
+  ]
 }
