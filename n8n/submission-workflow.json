@@ -115,13 +115,45 @@
       }
     },
     {
+      "id": "node-correct-text",
+      "name": "Korekce textu",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1740, 300],
+      "continueOnFail": true,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mistral.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "headerAuth",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: 'mistral-small-latest', messages: [{ role: 'user', content: 'Oprav překlepy, gramatiku a formátování následujícího textu. Zachovej původní jazyk, strukturu a veškerý obsah. Vrať pouze opravený text bez jakéhokoliv komentáře.\\n\\n' + $('Extrahuj text OCR').item.json.instructionsText }], max_tokens: 2000 }) }}",
+        "options": {}
+      },
+      "credentials": {
+        "headerAuth": { "name": "Mistral API Key" }
+      }
+    },
+    {
+      "id": "node-extract-correction",
+      "name": "Extrahuj korekci",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [1960, 300],
+      "parameters": {
+        "jsCode": "const item = items[0];\n// Pokud korekce proběhla, použij opravený text\nconst corrected = item.json?.choices?.[0]?.message?.content?.trim() || '';\n// Fallback na původní OCR text\nconst original  = $node['Extrahuj text OCR'].json.instructionsText || '';\nreturn [{ json: { instructionsText: corrected || original } }];"
+      }
+    },
+    {
       "id": "node-merge-activities",
       "name": "Sestav activities.json",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [1740, 300],
+      "position": [2180, 300],
       "parameters": {
-        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\nconst instructionsText = $node['Extrahuj text OCR'].json.instructionsText || '';\n\n// SHA existujícího souboru — nutné pro GitHub PUT update (bez SHA vrátí 422)\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:                   prep.activityId,\n  title:                prep.team,\n  description:          prep.description,\n  url:                  '',\n  btnLabel:             'Zobrazit',\n  photo:                prep.photoPublicPath,\n  instructionsPhoto:    prep.instructionsBase64 ? prep.instructionsPublicPath : '',\n  instructionsText\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
+        "jsCode": "const item = items[0];\nconst prep = $node['Připrav data'].json;\nconst ghFile = $node['Načti activities.json'].json;\nconst instructionsText = $node['Extrahuj korekci'].json.instructionsText || '';\n\n// SHA existujícího souboru — nutné pro GitHub PUT update (bez SHA vrátí 422)\nconst activitiesSha = ghFile?.sha || null;\n\n// Dekóduj stávající activities.json, nebo začni prázdný\nlet current = { eventId: prep.eventId, title: '', activities: [] };\nif (ghFile && ghFile.content) {\n  try {\n    current = JSON.parse(Buffer.from(ghFile.content, 'base64').toString('utf-8'));\n  } catch(e) {}\n}\n\n// Přidej novou aktivitu\ncurrent.activities = current.activities || [];\ncurrent.activities.push({\n  id:                   prep.activityId,\n  title:                prep.team,\n  description:          prep.description,\n  url:                  '',\n  btnLabel:             'Zobrazit',\n  photo:                prep.photoPublicPath,\n  instructionsPhoto:    prep.instructionsBase64 ? prep.instructionsPublicPath : '',\n  instructionsText\n});\n\nconst newActivitiesBase64 = Buffer.from(JSON.stringify(current, null, 2)).toString('base64');\n\nreturn [{\n  json: {\n    ...prep,\n    newActivitiesBase64,\n    activitiesSha\n  }\n}];"
       }
     },
     {
@@ -129,7 +161,7 @@
       "name": "Nahraj fotku",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1960, 300],
+      "position": [2400, 300],
       "parameters": {
         "method": "PUT",
         "url": "=https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/{{ $json.photoRepoPath }}",
@@ -150,7 +182,7 @@
       "name": "Připrav upload instrukcí",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [2180, 300],
+      "position": [2620, 300],
       "parameters": {
         "jsCode": "// Připraví URL a body pro nahrání fotky instrukcí\n// Pokud instructions nebyly nahrány, vrátí prázdné stringy → Nahraj foto instrukcí selže tiše (continueOnFail)\nconst d = $('Sestav activities.json').item.json;\n\nreturn [{\n  json: {\n    instrUrl:  'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + d.instructionsRepoPath,\n    instrBody: JSON.stringify({\n      message: 'submission: instrukce ' + d.team,\n      content: d.instructionsBase64,\n      branch:  d.branchName\n    })\n  }\n}];"
       }
@@ -160,7 +192,7 @@
       "name": "Nahraj foto instrukcí",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [2400, 300],
+      "position": [2840, 300],
       "continueOnFail": true,
       "parameters": {
         "method": "PUT",
@@ -182,7 +214,7 @@
       "name": "Připrav JSON upload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 1,
-      "position": [2620, 300],
+      "position": [3060, 300],
       "parameters": {
         "jsCode": "// Připraví URL a body pro nahrání activities.json jako plain string\n// (komplexní výrazy v HTTP Request URL/body polích v n8n mohou selhat s 'invalid syntax')\nconst d = $('Sestav activities.json').item.json;\n\nconst bodyObj = {\n  message: 'submission: data ' + d.team,\n  content: d.newActivitiesBase64,\n  branch:  d.branchName\n};\n// SHA je povinné pokud soubor již existuje, jinak GitHub vrátí 422\nif (d.activitiesSha) bodyObj.sha = d.activitiesSha;\n\nreturn [{\n  json: {\n    uploadUrl:  'https://api.github.com/repos/chmelainv/AI-nadsenci-web/contents/' + d.activitiesPath,\n    uploadBody: JSON.stringify(bodyObj),\n    // metadata pro Vytvoř PR\n    team:            d.team,\n    description:     d.description,\n    photoPublicPath: d.photoPublicPath,\n    branchName:      d.branchName\n  }\n}];"
       }
@@ -192,7 +224,7 @@
       "name": "Nahraj activities.json",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [2840, 300],
+      "position": [3280, 300],
       "parameters": {
         "method": "PUT",
         "url": "={{ $json.uploadUrl }}",
@@ -213,7 +245,7 @@
       "name": "Vytvoř PR",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [3060, 300],
+      "position": [3500, 300],
       "parameters": {
         "method": "POST",
         "url": "https://api.github.com/repos/chmelainv/AI-nadsenci-web/pulls",
@@ -234,7 +266,7 @@
       "name": "Odpověz 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [3280, 300],
+      "position": [3720, 300],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={ \"ok\": true }"
@@ -261,6 +293,12 @@
       "main": [[{ "node": "Extrahuj text OCR", "type": "main", "index": 0 }]]
     },
     "Extrahuj text OCR": {
+      "main": [[{ "node": "Korekce textu", "type": "main", "index": 0 }]]
+    },
+    "Korekce textu": {
+      "main": [[{ "node": "Extrahuj korekci", "type": "main", "index": 0 }]]
+    },
+    "Extrahuj korekci": {
       "main": [[{ "node": "Sestav activities.json", "type": "main", "index": 0 }]]
     },
     "Sestav activities.json": {
