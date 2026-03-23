@@ -13,6 +13,8 @@
     .desc-full  { display: none; }
     .expanded .desc-short { display: none; }
     .expanded .desc-full  { display: block; }
+    .instr-body { display: none; }
+    .instr-open .instr-body { display: block; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -104,24 +106,29 @@
                 </button>` : ''}
             </div>
 
-            ${a.instructionsPhoto ? `
-              <div class="mb-3">
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Instrukce</p>
-                <img src="${esc(a.instructionsPhoto)}" alt="Instrukce"
-                  class="w-full rounded-xl object-contain border border-gray-100" style="max-height:160px;">
-              </div>` : ''}
-
-            ${instrText ? `
-              <div class="mb-3">
-                ${!a.instructionsPhoto ? `<p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Instrukce</p>` : ''}
-                <div class="card-desc text-gray-500 text-xs leading-relaxed bg-gray-50 rounded-xl px-3 py-2" data-full="${esc(instrText)}">
-                  <span class="desc-short">${esc(instrShort)}</span>
-                  <span class="desc-full">${esc(instrText)}</span>
-                  ${instrHasMore ? `
-                    <button onclick="toggleDesc(this.closest('.card-desc'))"
-                      class="block text-purple-600 text-xs mt-1 hover:underline font-medium toggle-btn">
-                      Zobrazit více
-                    </button>` : ''}
+            ${(a.instructionsPhoto || instrText) ? `
+              <div class="instr-section mb-3">
+                <button onclick="toggleInstr(this.closest('.instr-section'))"
+                  class="instr-btn flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-gray-600 transition-colors mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="instr-chevron w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                  </svg>
+                  Zobrazit instrukce
+                </button>
+                <div class="instr-body space-y-2">
+                  ${a.instructionsPhoto ? `
+                    <img src="${esc(a.instructionsPhoto)}" alt="Instrukce"
+                      class="w-full rounded-xl object-contain border border-gray-100" style="max-height:200px;">` : ''}
+                  ${instrText ? `
+                    <div class="card-desc text-gray-500 text-xs leading-relaxed bg-gray-50 rounded-xl px-3 py-2" data-full="${esc(instrText)}">
+                      <span class="desc-short">${esc(instrShort)}</span>
+                      <span class="desc-full">${esc(instrText)}</span>
+                      ${instrHasMore ? `
+                        <button onclick="toggleDesc(this.closest('.card-desc'))"
+                          class="block text-purple-600 text-xs mt-1 hover:underline font-medium toggle-btn">
+                          Zobrazit více
+                        </button>` : ''}
+                    </div>` : ''}
                 </div>
               </div>` : ''}
 
@@ -141,6 +148,14 @@
     function toggleDesc(el) {
       const expanded = el.classList.toggle('expanded');
       el.querySelector('.toggle-btn').textContent = expanded ? 'Zobrazit méně' : 'Zobrazit více';
+    }
+
+    function toggleInstr(section) {
+      const open = section.classList.toggle('instr-open');
+      const btn = section.querySelector('.instr-btn');
+      const chevron = section.querySelector('.instr-chevron');
+      btn.lastChild.textContent = open ? 'Skrýt instrukce' : 'Zobrazit instrukce';
+      chevron.style.transform = open ? 'rotate(90deg)' : '';
     }
 
     function showError() {
