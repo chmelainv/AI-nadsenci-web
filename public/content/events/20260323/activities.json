@@ -69,7 +69,7 @@
     {
       "id": "1774217039310",
       "title": "Test Tym3",
-      "description": "UI komponenty (shadcn/ui, Tailwind, layout, header, footer)\r\nDesign systém (barvy, typografie, responzivita, dark mode)\r\nAuth flow základ (registrační formulář, login page)\r\nQR attendance logika (adaptace API + UI)\r\nNetworking hra (adaptace)",
+      "description": "UI komponenty (shadcn/ui, Tailwind, layout, header, footer)\nDesign systém (barvy, typografie, responzivita, dark mode)\nAuth flow základ (registrační formulář, login page)\nQR attendance logika (adaptace API + UI)\nNetworking hra (adaptace)",
       "url": "",
       "btnLabel": "Zobrazit",
       "photo": "/images/submissions/20260323/1774217039310.jpg"
@@ -78,11 +78,9 @@
       "id": "1774267577366",
       "title": "Test Tym první testovaci",
       "description": "Tohle je nový pokus jak se odlišit.",
-      "url": "",
+      "url": "https://app.maronext.cz/admin/prepravy/b9925a09-7473-4ae2-80d0-a2d25bd907f0/print",
       "btnLabel": "Zobrazit",
-      "photo": "/images/submissions/20260323/1774267577366.jpg",
-      "instructionsPhoto": "/images/submissions/20260323/1774267577366-instructions.jpg",
-      "instructionsText": "KONTROLNÍ TEST\nINSTRUKCÍ, JAK SE\nMÁ NÁS SUPER MODEL\nCHOVAT. MÁ BYT PRATE- LSAY. NESMÍ SE NICÍM\nPROVINIT, ANI NIKOMU\nUBLIŽIT."
+      "photo": "/images/submissions/20260323/1774267577366.jpg"
     }
   ]
 }
