@@ -15,9 +15,25 @@
     .expanded .desc-full  { display: block; }
     .instr-body { display: none; }
     .instr-open .instr-body { display: block; }
+    .zoomable { cursor: zoom-in; }
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+    #lightbox.open { display: flex; }
+    #lightbox img { max-width: 92vw; max-height: 92vh; object-fit: contain;
+      border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
+    #lightbox-close { position: absolute; top: 16px; right: 20px;
+      color: #fff; font-size: 2rem; line-height: 1; cursor: pointer;
+      background: rgba(0,0,0,0.4); border-radius: 50%; width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <span id="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightbox-img" src="" alt="">
+  </div>
 
   <!-- Header -->
   <header class="bg-white border-b border-gray-200 px-5 py-3">
@@ -88,7 +104,8 @@
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col">
           ${a.photo
             ? `<img src="${esc(a.photo)}" alt="${esc(a.title)}"
-                class="w-full object-cover" style="height:180px;">`
+                class="w-full object-cover zoomable" style="height:180px;"
+                onclick="openLightbox(this.src)">`
             : `<div class="bg-gray-100 flex items-center justify-center" style="height:100px;">
                 <span class="text-gray-300 text-3xl">📷</span>
                </div>`
@@ -118,7 +135,8 @@
                 <div class="instr-body space-y-2">
                   ${a.instructionsPhoto ? `
                     <img src="${esc(a.instructionsPhoto)}" alt="Instrukce"
-                      class="w-full rounded-xl object-contain border border-gray-100" style="max-height:200px;">` : ''}
+                      class="w-full rounded-xl object-contain border border-gray-100 zoomable" style="max-height:200px;"
+                      onclick="openLightbox(this.src)">` : ''}
                   ${instrText ? `
                     <div class="card-desc text-gray-500 text-xs leading-relaxed bg-gray-50 rounded-xl px-3 py-2" data-full="${esc(instrText)}">
                       <span class="desc-short">${esc(instrShort)}</span>
@@ -157,6 +175,19 @@
       btn.lastChild.textContent = open ? 'Skrýt instrukce' : 'Zobrazit instrukce';
       chevron.style.transform = open ? 'rotate(90deg)' : '';
     }
+
+    function openLightbox(src) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
     function showError() {
       document.getElementById('loading').classList.add('hidden');
