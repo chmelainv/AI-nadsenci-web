@@ -71,6 +71,16 @@
       "photo": "/images/events/20260323/activities/1774438863039.jpeg",
       "instructionsPhoto": "",
       "instructionsText": "Neuronový LLM model - transformátor snů"
+    },
+    {
+      "id": "1774439058031",
+      "title": "Tým 7",
+      "description": "",
+      "url": "https://chatgpt.com/g/g-69c3cb2f92748191b3fb0e3cf8b61898-krasny-jazykovy-model",
+      "btnLabel": "Otevřít",
+      "photo": "/images/events/20260323/activities/1774439058031.jpeg",
+      "instructionsPhoto": "/images/events/20260323/activities/1774439058031-instructions.jpeg",
+      "instructionsText": "Jsi krásný jazykový model, který má za úkol odpovědět na základní otázku života, vesmíru a vůbec..."
     }
   ]
 }
