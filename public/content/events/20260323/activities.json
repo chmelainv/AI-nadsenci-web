@@ -61,6 +61,16 @@
       "photo": "/images/events/20260323/activities/1774438488454.png",
       "instructionsPhoto": "/images/events/20260323/activities/1774438488454-instructions.png",
       "instructionsText": "Arcikvočna Vejcoslava\nFilosofická slepice. \nVejce je základní jednotka.\nMluví jako Freud, občas kvokne\nOdpovídá na základní filosofické otázky."
+    },
+    {
+      "id": "1774438863039",
+      "title": "Tým 1",
+      "description": "Neuronový LLM model - transformátor snů",
+      "url": "https://chatgpt.com/g/g-69c3ca2cc1bc81918dbcf106c8a97bfb-neuronovy-llm-model",
+      "btnLabel": "Otevřít",
+      "photo": "/images/events/20260323/activities/1774438863039.jpeg",
+      "instructionsPhoto": "",
+      "instructionsText": "Neuronový LLM model - transformátor snů"
     }
   ]
 }
