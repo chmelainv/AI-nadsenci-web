@@ -93,8 +93,8 @@ function renderHero(hero, events, partners) {
 
     <div class="mt-12 max-w-3xl mx-auto">
       <div class="rounded-2xl overflow-hidden shadow-lg">
-        <video controls playsinline class="w-full" poster="${BASE}content/events/20251002/media/cover1.png">
-          <source src="${BASE}content/events/20251002/media/fajne_ck_wide.mp4" type="video/mp4">
+        <video controls playsinline class="w-full" poster="${BASE}content/events/20260323/media/cover2.png">
+          <source src="${BASE}content/events/20260323/media/fajne_prompty_16_9.mp4" type="video/mp4">
         </video>
       </div>
     </div>
